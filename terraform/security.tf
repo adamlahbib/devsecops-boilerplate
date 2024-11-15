@@ -47,20 +47,4 @@ resource "helm_release" "crowdsec" {
     values = [
         file("./values/crowdsec.yaml")
     ]
-
-
-    set {
-        name = "metrics.enabled"
-        value = "true"
-    }
-
-    set {
-        name = "metrics.serviceMonitor.enabled"
-        value = "true"
-    }
-
-    set { 
-        name = "metrics.serviceMonitor.namespace"
-        value = "monitoring"
-    }
 }

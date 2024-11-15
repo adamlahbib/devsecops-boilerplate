@@ -4,7 +4,7 @@ resource "helm_release" "ingress-nginx" {
     chart      = "ingress-nginx"
     namespace  = "ingress-nginx"
     create_namespace = true
-    version    = "4.0.0"
+    version    = "4.11.3"
 
     values = [
         file("./values/ingress.yaml")
