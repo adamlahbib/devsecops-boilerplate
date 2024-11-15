@@ -22,7 +22,7 @@ provider "aws" {
 provider "helm" {
     kubernetes {
         host = aws_eks_cluster.eks_cluster.endpoint
-        token = aws_eks_cluster_auth.cluster_auth.token
+        token = data.aws_eks_cluster_auth.cluster_auth.token
         insecure = true
     }
 }
