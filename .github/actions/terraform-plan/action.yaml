@@ -42,9 +42,8 @@ runs:
       uses: dflook/terraform-plan@v1
       with:
         path: ./terraform
-        var_file:
-          - ./terraform/stages/${{ inputs.stage }}.tfvars
-        backend_config: |
+        var_file: ./terraform/stages/${{ inputs.stage }}.tfvars
+        backend_config: >
           bucket = ${{ inputs.tfstate-bucket }}
           key = ${{ inputs.tfstate-key }}
           region = ${{ inputs.aws-region }}
