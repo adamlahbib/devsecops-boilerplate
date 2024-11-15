@@ -11,5 +11,5 @@ output "repository_name" {
 }
 
 output "cluster_ip" {
-    value = eks_cluster.eks_cluster.endpoint
+    value = aws_eks_cluster.eks_cluster.endpoint
 }
