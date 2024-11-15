@@ -1,9 +1,9 @@
 terraform {
-  backend "s3" {}
+    backend "s3" {}
 }
 
 data "aws_eks_cluster_auth" "cluster_auth" {
-  name = var.cluster_name
+    name = var.cluster_name
 }
 
 resource "aws_eks_cluster" "eks_cluster" {
@@ -47,8 +47,8 @@ resource "aws_eks_node_group" "eks_node_group" {
     instance_types  = ["t3.micro"]
 
     scaling_config {
-        desired_size = 1
-        max_size     = 1
+        desired_size = 2
+        max_size     = 3
         min_size     = 1
     }
 

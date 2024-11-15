@@ -18,16 +18,17 @@ lapi:
     enabled: true
     serviceMonitor:
       enabled: true
+      namespace: monitoring
 
 agent:
   acquisition:
-    - namespace: traefik
-      podName: traefik-*
-      program: traefik
+    - namespace: ingress-nginx
+      podName: ingress-nginx-controller-*
+      program: nginx
 
   env:
     - name: COLLECTIONS
-      value: crowdsecurity/traefik
+      value: crowdsecurity/nginx
 
   resources:
     requests:
@@ -41,3 +42,4 @@ agent:
     enabled: true
     serviceMonitor:
       enabled: true
+      namespace: monitoring
