@@ -2,6 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: app-service
+  namespace: prod
   labels:
     app: my-app
 spec:

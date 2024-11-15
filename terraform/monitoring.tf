@@ -4,6 +4,16 @@ resource "helm_release" "grafana" {
     chart      = "grafana"
     namespace  = "monitoring"
     version    = "6.50.7"
+
+    set {
+        name  = "service.type"
+        value = "NodePort"
+    }
+
+    set {
+        name  = "persistence.enabled"
+        value = "true"
+    }
 }
 
 resource "helm_release" "loki" {

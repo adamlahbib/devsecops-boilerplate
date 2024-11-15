@@ -11,6 +11,11 @@ terraform {
         helm = {
             source  = "hashicorp/helm"
             version = ">= 2.0.2"
+            kubernetes {
+                host = aws_eks_cluster.eks_cluster.endpoint
+                token = aws_eks_cluster_auth.cluster_auth.token
+                insecure = true
+            }
         }
     }
 }
