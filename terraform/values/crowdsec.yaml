@@ -1,0 +1,43 @@
+container_runtime: containerd
+
+lapi:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 384Mi
+    limits:
+      cpu: 1000m
+      memory: 384Mi
+  persistentVolume:
+    data:
+      enabled: false
+    config:
+      enabled: false
+
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+
+agent:
+  acquisition:
+    - namespace: traefik
+      podName: traefik-*
+      program: traefik
+
+  env:
+    - name: COLLECTIONS
+      value: crowdsecurity/traefik
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 1000m
+      memory: 128Mi
+
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
