@@ -9,6 +9,9 @@ on:
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_REGION: ${{ secrets.AWS_BASE_REGION }}
+  TFSTATE_BUCKET: ${{ secrets.TFSTATE_BUCKET }}
+  TFSTATE_KEY: ${{ secrets.TFSTATE_KEY }}
 
 jobs: 
   terraform-apply:
@@ -34,11 +37,11 @@ jobs:
         id: terraform-apply
         uses: ./.github/actions/terraform-apply
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_BASE_REGION }}
-          tfstate-bucket: ${{ secrets.TFSTATE_BUCKET }}
-          tfstate-key: ${{ secrets.TFSTATE_KEY }}
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+          tfstate-bucket: ${{ env.TFSTATE_BUCKET }}
+          tfstate-key: ${{ env.TFSTATE_KEY }}
           stage: ${{ env.stage }}
 
   deploy:
@@ -76,8 +79,8 @@ jobs:
         id: build-push-image
         uses: ./.github/actions/build-push-image
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
           ecr-repository: ${{ env.ECR_REPOSITORY }}
           dockerfile: ./Dockerfile

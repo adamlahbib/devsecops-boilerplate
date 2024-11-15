@@ -10,6 +10,14 @@ permissions:
   contents: read
   pull-requests: write
 
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_REGION: ${{ secrets.AWS_BASE_REGION }}
+  TFSTATE_BUCKET: ${{ secrets.TFSTATE_BUCKET }}
+  TFSTATE_KEY: ${{ secrets.TFSTATE_KEY }}
+  GIT_TOKEN: ${{ secrets.GIT_TOKEN }}
+
 jobs: 
   terraform-plan:
     runs-on: ubuntu-latest
@@ -34,10 +42,10 @@ jobs:
         id: terraform-plan
         uses: ./.github/actions/terraform-plan
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-west-3
-          tfstate-bucket: ${{ secrets.TFSTATE_BUCKET }}
-          tfstate-key: ${{ secrets.TFSTATE_KEY }}
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+          tfstate-bucket: ${{ env.TFSTATE_BUCKET }}
+          tfstate-key: ${{ env.TFSTATE_KEY }}
           stage: ${{ env.stage }}
-          github-token: ${{ secrets.GIT_TOKEN }} 
+          github-token: ${{ env.GIT_TOKEN }} 
