@@ -1,0 +1,43 @@
+name: Terraform Plan
+
+on:
+  pull_request:
+    paths:
+      - '**/*.tf'
+      - '**/*.tfvars'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs: 
+  terraform-plan:
+    runs-on: ubuntu-latest
+    name: Terraform Plan
+    defaults:
+      run:
+        working-directory: ./terraform
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Determine Deployment Stage
+        id: determine_stage
+        run: |
+          if [[ "${{ github.ref_name }}" == "main" ]]; then
+            echo "stage=prod" >> $GITHUB_ENV
+          else
+            echo "stage=dev" >> $GITHUB_ENV
+          fi
+
+      - name: Terraform Plan
+        id: terraform-plan
+        uses: ./.github/actions/terraform-plan
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-3
+          tfstate-bucket: ${{ secrets.TFSTATE_BUCKET }}
+          tfstate-key: ${{ secrets.TFSTATE_KEY }}
+          stage: ${{ env.stage }}
+          github-token: ${{ secrets.GIT_TOKEN }} 

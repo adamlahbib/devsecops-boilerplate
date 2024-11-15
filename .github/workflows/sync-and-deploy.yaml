@@ -1,0 +1,120 @@
+name: Deploy to EKS
+
+on:
+  push:
+    branches:
+      - '**'
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+jobs: 
+  terraform-apply:
+    name: Sync Terraform
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./terraform
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Determine Deployment Stage
+        id: determine_stage
+        run: |
+          if [[ "${{ github.ref_name }}" == "main" ]]; then
+            echo "stage=prod" >> $GITHUB_ENV
+          else
+            echo "stage=dev" >> $GITHUB_ENV
+          fi
+
+      - name: Terraform Apply
+        id: terraform-apply
+        uses: ./.github/actions/terraform-apply
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_BASE_REGION }}
+          tfstate-bucket: ${{ secrets.TFSTATE_BUCKET }}
+          tfstate-key: ${{ secrets.TFSTATE_KEY }}
+          stage: ${{ env.stage }}
+
+  deploy:
+    needs: terraform
+    name: Deploy API
+    runs-on: ubuntu-latest
+    outputs:
+      message: ${{ steps.verify-deployment.outputs.status }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Determine Deployment Stage
+        id: determine_stage
+        run: |
+          if [[ "${{ github.ref_name }}" == "main" ]]; then
+            echo "stage=prod" >> $GITHUB_ENV
+          else
+            echo "stage=dev" >> $GITHUB_ENV
+          fi
+      
+      - name: Download Terraform Outputs
+        uses: actions/download-artifact@v3
+        with:
+          name: terraform-outputs
+      
+      - name: Set Environment Variables from Terraform Outputs
+        run: |
+          echo "AWS_REGION=$(jq -r .region.value tf_outputs.json)" >> $GITHUB_ENV
+          echo "EKS_CLUSTER_NAME=$(jq -r .cluster_name.value tf_outputs.json)" >> $GITHUB_ENV
+          echo "ECR_REPOSITORY=$(jq -r .repository_name.value tf_outputs.json)" >> $GITHUB_ENV
+          echo "CLUSTER_ENDPOINT=$(jq -r .cluster_ip.value tf_outputs.json)" >> $GITHUB_ENV
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-push-image
+        uses: ./.github/actions/build-push-image
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+          ecr-repository: ${{ env.ECR_REPOSITORY }}
+          dockerfile: ./Dockerfile
+          stage: ${{ env.stage }}
+
+      - name: Update Kubeconfig
+        run: aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
+
+      - name: Deploy to EKS
+        working-directory: ./k8s
+        env:
+          IMAGE: ${{ steps.build-push-image.outputs.image }}
+          STAGE: ${{ env.stage }}
+        run: |
+          sed -i "s|<IMAGE>|${IMAGE}|g" ${STAGE}/deployment.yaml
+          kubectl apply -f ${STAGE}
+
+      - name: Verify Deployment
+        id: verify-deployment
+        shell: bash
+        run: |
+          kubectl rollout status deployment/${STAGE} --timeout=5m
+          if [ $? -eq 0 ]; then
+            echo "status=Deployment successful on ${{ env.CLUSTER_ENDPOINT }}!" >> $GITHUB_OUTPUT
+          else
+            echo "status=Deployment failed!" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+  notify-slack:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_CHANNEL: "#deployments"
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_USERNAME: "Deployer on Cloudflare"
+          SLACK_MESSAGE: ${{ needs.deploy.outputs.message }}
+          SLACK_COLOR: ${{ job.status }}
+          SLACK_ICON: "https://avatars.githubusercontent.com/u/44036562?s=200&v=4"

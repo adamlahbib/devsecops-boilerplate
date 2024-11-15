@@ -1,0 +1,35 @@
+name: Terraform Destroy
+
+on:
+  workflow_dispatch:
+
+jobs:
+  terraform-destroy:
+    runs-on: ubuntu-latest
+    name: Terraform Destroy
+    defaults:
+      run:
+        working-directory: ./terraform
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Determine Deployment Stage
+        id: determine_stage
+        run: |
+          if [[ "${{ github.ref_name }}" == "main" ]]; then
+            echo "stage=prod" >> $GITHUB_ENV
+          else
+            echo "stage=dev" >> $GITHUB_ENV
+          fi
+
+      - name: Terraform Destroy
+        id: terraform-destroy
+        uses: ./.github/actions/terraform-destroy
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-3
+          tfstate-bucket: ${{ secrets.TFSTATE_BUCKET }}
+          tfstate-key: ${{ secrets.TFSTATE_KEY }}
+          stage: ${{ env.stage }}

@@ -1,0 +1,51 @@
+name: Terraform Apply
+description: 'Applies Terraform configuration'
+
+inputs:
+  aws-access-key-id:
+    description: 'AWS Access Key ID'
+    required: true
+  aws-secret-access-key:
+    description: 'AWS Secret Access Key'
+    required: true
+  aws-region:
+    description: 'AWS Region'
+    required: true
+  tfstate-bucket:
+    description: 'Terraform state bucket'
+    required: true
+  tfstate-key:
+    description: 'Terraform state key'
+    required: true
+  stage:
+    description: 'Deployment stage'
+    required: true
+  github-token:
+    description: 'GitHub token'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with: 
+        aws-access-key-id: ${{ inputs.aws-access-key-id }}
+        aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
+        aws-region: ${{ inputs.aws-region }}
+
+    - name: Export GitHub Token
+      shell: bash
+      run: echo "GITHUB_TOKEN=${{ inputs.github-token }}" >> $GITHUB_ENV
+
+    - name: Terraform Plan
+      uses: dflook/terraform-plan@v1
+      with:
+        path: ./terraform
+        var_file:
+          - ./terraform/stages/${{ inputs.stage }}.tfvars
+        backend_config: |
+          bucket = ${{ inputs.tfstate-bucket }}
+          key = ${{ inputs.tfstate-key }}
+          region = ${{ inputs.aws-region }}
+          encrypt = true

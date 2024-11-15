@@ -1,0 +1,55 @@
+name: Test Pipeline
+
+on: [pull_request]
+
+jobs: 
+  test-app:
+    runs-on: ubuntu-latest
+    name: Test Application
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.head_ref }}
+
+      - name: Bandit Security Linting
+        uses: tj-actions/bandit@v5.1
+        with:
+          options: "-l" # Include only high severity issues
+
+      - name: Trufflehog Leaked Secret Scanning
+        uses: edplato/trufflehog-actions-scan@master
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with: 
+          version: latest
+
+      - name: Build Local Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          tags: localhost/app:latest
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Grype Container Vulnerability Scanning
+        uses: anchore/scan-action@v3
+        with:
+          image: "localhost/app:latest"
+          fail-build: false
+          severity-cutoff: "critical"
+      
+      - name: Compose-Up
+        run: make run
+      
+      - name: Run-Tests
+        run: make test
+
+      - name: Compose-Down
+        if: always()
+        run: make clean
