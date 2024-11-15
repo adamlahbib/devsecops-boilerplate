@@ -37,11 +37,11 @@ runs:
         path: ./terraform
         var_file: ./terraform/stages/${{ inputs.stage }}.tfvars
         backend_config: >
-          bucket = ${{ inputs.tfstate-bucket }}
-          key = ${{ inputs.tfstate-key }}
-          region = ${{ inputs.aws-region }}
-          encrypt = true
-        auto-approve: true
+          bucket=${{ inputs.tfstate-bucket }},
+          key=${{ inputs.tfstate-key }},
+          region=${{ inputs.aws-region }},
+          encrypt=true
+        auto_approve: true
     
     - name: Export Terraform Outputs
       shell: bash
