@@ -102,7 +102,7 @@ jobs:
         id: verify-deployment
         shell: bash
         run: |
-          kubectl rollout status deployment/${STAGE} --timeout=5m
+          kubectl rollout status deployment/${STAGE} -n ${STAGE} --timeout=5m
           if [ $? -eq 0 ]; then
             echo "status=Deployment successful on ${{ env.CLUSTER_ENDPOINT }}!" >> $GITHUB_OUTPUT
           else

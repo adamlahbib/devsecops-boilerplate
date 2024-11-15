@@ -92,6 +92,6 @@ resource "helm_release" "crowdsec" {
     version    = "0.13.0"
 
     values = [
-        file("${path.module}/values/crowdsec-values.yaml")
+        file("./values/crowdsec.yaml")
     ]
 }
