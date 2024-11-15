@@ -11,7 +11,7 @@ resource "aws_eks_cluster" "eks_cluster" {
         security_group_ids = [aws_security_group.eks_cluster_sg.id]
     }
 
-    depends_on = [aws_iam_role_policy_attachment.eks_cluster_policy_attachment]
+    depends_on = [aws_iam_role_policy_attachment.eks_policy_attachment]
 }
 
 resource "aws_iam_role" "eks_role" {
