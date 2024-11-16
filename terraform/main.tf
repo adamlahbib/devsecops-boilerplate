@@ -67,14 +67,6 @@ resource "aws_iam_instance_profile" "eks_instance_profile" {
 }
 
 resource "aws_launch_template" "eks_launch_template" {
-    block_device_mappings {
-        device_name = "/dev/xvda"
-        ebs {
-            delete_on_termination = true
-            volume_size           = 20
-            volume_type           = "gp2"
-        }
-    }
 
     image_id        = data.aws_ami.node-image.id
     instance_type   = "t3.micro"
