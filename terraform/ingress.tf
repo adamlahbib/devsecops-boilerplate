@@ -11,6 +11,23 @@ resource "helm_release" "ingress-nginx" {
     ]
 }
 
+resource "kubernetes_namespace" "dev" {
+    metadata {
+        name = "dev"
+    }
+}
+
+resource "kubernetes_namespace" "prod" {
+    metadata {
+        name = "prod"
+    }
+}
+
+resource "kubernetes_namespace" "monitoring" {
+    metadata {
+        name = "monitoring"
+    }
+}
 
 resource "kubernetes_ingress_v1" "dev-ingress" {
     metadata {
@@ -65,7 +82,7 @@ resource "kubernetes_ingress_v1" "prod-ingress" {
                     backend{
                         service {
                             name = "app-service"
-                            port {
+                       3000     port {
                                 number = 80
                             }
                         }
