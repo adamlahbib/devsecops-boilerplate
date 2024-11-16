@@ -13,3 +13,4 @@ repository_name = "aqemia-adaml-repo"
 aws_zone = "eu-west-3a"
 
 dns_name = "aqemia.admida0ui.de" # sample subdomain based on my personal blog for test purposes.
+
