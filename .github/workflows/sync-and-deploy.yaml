@@ -13,6 +13,8 @@ env:
   TFSTATE_BUCKET: ${{ secrets.TFSTATE_BUCKET }}
   TFSTATE_KEY: ${{ secrets.TFSTATE_KEY }}
   GRAFANA_ADMIN_PASSWORD: ${{ secrets.GRAFANA_ADMIN_PASSWORD }}
+  ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+  EKS_CLUSTER_NAME: ${{ secrets.EKS_CLUSTER_NAME }}
 
 jobs: 
   terraform-apply:
@@ -63,18 +65,6 @@ jobs:
           else
             echo "stage=dev" >> $GITHUB_ENV
           fi
-      
-      - name: Download Terraform Outputs
-        uses: actions/download-artifact@v3
-        with:
-          name: terraform-outputs
-      
-      - name: Set Environment Variables from Terraform Outputs
-        run: |
-          echo "AWS_REGION=$(jq -r .region.value tf_outputs.json)" >> $GITHUB_ENV
-          echo "EKS_CLUSTER_NAME=$(jq -r .cluster_name.value tf_outputs.json)" >> $GITHUB_ENV
-          echo "ECR_REPOSITORY=$(jq -r .repository_name.value tf_outputs.json)" >> $GITHUB_ENV
-          echo "CLUSTER_ENDPOINT=$(jq -r .cluster_ip.value tf_outputs.json)" >> $GITHUB_ENV
 
       - name: Build, tag, and push image to Amazon ECR
         id: build-push-image
@@ -106,7 +96,7 @@ jobs:
         run: |
           kubectl rollout status deployment/${STAGE} -n ${STAGE} --timeout=5m
           if [ $? -eq 0 ]; then
-            echo "status=Deployment successful on ${{ env.CLUSTER_ENDPOINT }}!" >> $GITHUB_OUTPUT
+            echo "status=Deployment successful!" >> $GITHUB_OUTPUT
           else
             echo "status=Deployment failed!" >> $GITHUB_OUTPUT
             exit 1

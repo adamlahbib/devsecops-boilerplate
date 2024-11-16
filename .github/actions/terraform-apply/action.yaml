@@ -47,13 +47,3 @@ runs:
           region=${{ inputs.aws-region }},
           encrypt=true
         auto_approve: true
-    
-    - name: Export Terraform Outputs
-      shell: bash
-      run: terraform output -json > ./terraform/tf_outputs.json
-
-    - name: Upload Terraform Outputs
-      uses: actions/upload-artifact@v3
-      with:
-        name: terraform-outputs
-        path: ./terraform/tf_outputs.json
