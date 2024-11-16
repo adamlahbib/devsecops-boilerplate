@@ -82,5 +82,5 @@ jobs:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_USERNAME: "Test Pipeline Results"
           SLACK_MESSAGE: ${{ needs.test-app.outputs.message }}
-          SLACK_COLOR: ${{ needs.test-app.outputs.message == *"failed"* && "danger" || "good" }}
+          SLACK_COLOR: ${{ contains(needs.test-app.outputs.message, 'failed') && 'danger' || 'good' }}
           SLACK_ICON: "https://avatars.githubusercontent.com/u/44036562?s=200&v=4"
