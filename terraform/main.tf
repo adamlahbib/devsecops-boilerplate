@@ -112,7 +112,7 @@ resource "aws_autoscaling_group" "eks_nodes" {
     max_size     = 3
     min_size     = 1
 
-    vpc_zone_identifier = [module.vpc.azs[0]]
+    vpc_zone_identifier = [var.aws_zone]
 
     launch_template {
         id = aws_launch_template.eks_launch_template.id
