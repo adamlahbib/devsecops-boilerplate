@@ -66,11 +66,6 @@ resource "aws_iam_instance_profile" "eks_instance_profile" {
     role = aws_iam_role.eks_role.name
 }
 
-resource "aws_key_pair" "node" {
-    key_name   = "blimp-node"
-    public_key = file("~/.ssh/id_rsa.pub")
-}
-
 resource "aws_launch_template" "eks_launch_template" {
     block_device_mappings {
         device_name = "/dev/xvda"
@@ -87,7 +82,6 @@ resource "aws_launch_template" "eks_launch_template" {
 
     image_id        = data.aws_ami.node-image.id
     instance_type   = "t3.micro"
-    key_name        = aws_key_pair.node.key_name
 
     vpc_security_group_ids = [aws_security_group.eks_cluster_sg.id]
 
