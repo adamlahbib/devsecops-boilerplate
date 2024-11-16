@@ -104,7 +104,7 @@ resource "aws_eks_node_group" "eks_nodes" {
     node_role_arn   = aws_iam_role.worker_role.arn
     subnet_ids      = module.vpc.private_subnets
     ami_type        = "CUSTOM"
-    instance_types  = ["t3.micro"]
+    instance_types  = ["t3.medium"]
     capacity_type   = "ON_DEMAND"
 
     launch_template {
@@ -113,9 +113,9 @@ resource "aws_eks_node_group" "eks_nodes" {
     }
 
     scaling_config {
-        desired_size = 5
-        max_size     = 6
-        min_size     = 2
+        desired_size = 3
+        max_size     = 4
+        min_size     = 1
     }
 
     update_config {
