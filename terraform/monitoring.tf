@@ -30,7 +30,7 @@ resource "helm_release" "prometheus_operator" {
     create_namespace = true
     version    = "66.2.1"
 
-    value = [yamlencode({
+    values = [yamlencode({
         grafana= {
             enabled = true
             service = {
