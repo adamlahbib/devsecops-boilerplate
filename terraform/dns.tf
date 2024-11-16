@@ -11,7 +11,7 @@ resource "cloudflare_record" "app" {
 
     lifecycle {
         ignore_changes = [
-            value
+            content
         ]
     }
 }
