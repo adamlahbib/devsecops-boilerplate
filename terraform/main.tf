@@ -107,12 +107,12 @@ resource "aws_launch_template" "eks_launch_template" {
 }
 
 resource "aws_autoscaling_group" "eks_nodes" {
-    name = "eks-node-group"
-    desired_size = 2
+    name = "eks-nodes"
+    desired_capacity = 2
     max_size     = 3
     min_size     = 1
 
-    vpc_zone_identifier = module.vpc.subnet_zones[0]
+    vpc_zone_identifier = module.vpc.azs[0]
 
     launch_template {
         id = aws_launch_template.eks_launch_template.id
