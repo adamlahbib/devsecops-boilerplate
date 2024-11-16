@@ -87,7 +87,7 @@ jobs:
           IMAGE: ${{ steps.build-push-image.outputs.image }}
           STAGE: ${{ env.stage }}
         run: |
-          sed -i "s|<IMAGE>|${IMAGE}|g" ${STAGE}/deployment.yaml
+          sed -i "s|{{IMAGE}}|${IMAGE}|g" ${STAGE}/deployment.yaml
           kubectl apply -f ${STAGE}
 
       - name: Verify Deployment
