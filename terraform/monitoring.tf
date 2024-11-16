@@ -38,8 +38,9 @@ resource "helm_release" "prometheus_operator" {
             }
             "grafana.ini" = {
                 server = {
-                    root_url = "https://${var.dns_name}/grafana"
-                    domain = var.dns_name
+                    root_url = "https://aqemia.admida0ui.de/grafana/"
+                    domain = "aqemia.admida0ui.de"
+                    serve_from_sub_path = false
                 }
             }
             adminPassword = var.GRAFANA_ADMIN_PASSWORD
