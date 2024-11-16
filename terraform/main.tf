@@ -47,7 +47,7 @@ data "aws_ami" "node-image" {
 
     filter {
     name   = "name"
-    values = ["amazon-eks-node-1.16-*"]
+    values = ["amazon-eks-node-1.31-*"]
     }
 
     filter {
