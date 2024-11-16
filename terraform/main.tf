@@ -81,14 +81,8 @@ resource "aws_launch_template" "eks_launch_template" {
         }
     }
 
-    iam_instance_profile {
-        name = aws_iam_instance_profile.eks_instance_profile.name
-    }
+    name_prefix   = "eks-node"
     image_id        = data.aws_ami.node-image.id
-    instance_type   = "t3.micro"
-
-    vpc_security_group_ids = [aws_security_group.eks_cluster_sg.id]
-
     user_data = base64encode(<<-SCRIPT
         #!/bin/bash
         set -o xtrace
@@ -99,36 +93,34 @@ resource "aws_launch_template" "eks_launch_template" {
     )
 
     metadata_options {
-        http_put_response_hop_limit = 2
-        # Defaults
         http_endpoint = "enabled"
         http_tokens   = "optional"
     }
 }
 
-resource "aws_autoscaling_group" "eks_nodes" {
-    name = "eks-nodes"
-    desired_capacity = 2
-    max_size     = 3
-    min_size     = 1
-
-    vpc_zone_identifier = [module.vpc.private_subnets[0]]
+resource "aws_eks_node_group" "eks_nodes" {
+    cluster_name    = aws_eks_cluster.eks_cluster.name
+    node_group_name = "eks-node-group"
+    node_role_arn   = aws_iam_role.worker_role.arn
+    subnet_ids      = [module.vpc.private_subnets]
+    ami_type        = "AL2024_x86_64_STANDARD"
+    instance_types  = ["t3.micro"]
+    disk_size       = 20
+    capacity_type   = "ON_DEMAND"
 
     launch_template {
         id = aws_launch_template.eks_launch_template.id
         version = "$Latest"
     }
 
-    tag {
-        key                = "Name"
-        value              = "${aws_eks_cluster.eks_cluster.name}-node"
-        propagate_at_launch = true
+    scaling_config {
+        desired_size = 2
+        max_size     = 3
+        min_size     = 1
     }
 
-    tag {
-        key                = "kubernetes.io/cluster/${aws_eks_cluster.eks_cluster.name}"
-        value              = "owned"
-        propagate_at_launch = true
+    update_config {
+        max_unavailable = 1
     }
 
     depends_on = [aws_eks_cluster.eks_cluster]
