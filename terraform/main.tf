@@ -76,10 +76,6 @@ resource "aws_launch_template" "eks_launch_template" {
         }
     }
 
-    iam_instance_profile {
-        name = aws_iam_instance_profile.eks_instance_profile.name
-    }
-
     image_id        = data.aws_ami.node-image.id
     instance_type   = "t3.micro"
 
