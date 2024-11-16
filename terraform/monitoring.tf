@@ -12,6 +12,11 @@ resource "helm_release" "prometheus_operator" {
     }
 
     set {
+        name = "grafana.service.type"
+        value = "NodePort"
+    }
+
+    set {
         name  = "grafana.adminPassword"
         value = var.GRAFANA_ADMIN_PASSWORD
     }

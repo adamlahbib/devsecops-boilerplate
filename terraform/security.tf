@@ -40,7 +40,7 @@ resource "helm_release" "crowdsec" {
     name       = "crowdsec"
     repository = "https://crowdsecurity.github.io/helm-charts"
     chart      = "crowdsec"
-    namespace  = "monitoring"
+    namespace  = "crowdsec"
     create_namespace = true
     version    = "0.13.0"
 

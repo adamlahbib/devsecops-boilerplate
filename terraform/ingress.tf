@@ -12,7 +12,7 @@ resource "helm_release" "ingress-nginx" {
 }
 
 
-resource "kubernetes_ingress" "dev-ingress" {
+resource "kubernetes_ingress_v1" "dev-ingress" {
     metadata {
         name      = "dev-ingress"
         namespace = "dev"
@@ -39,7 +39,7 @@ resource "kubernetes_ingress" "dev-ingress" {
     }
 }
 
-resource "kubernetes_ingress" "prod-ingress" {
+resource "kubernetes_ingress_v1" "prod-ingress" {
     metadata {
         name      = "prod-ingress"
         namespace = "prod"
@@ -66,7 +66,7 @@ resource "kubernetes_ingress" "prod-ingress" {
     }
 }
 
-resource "kubernetes_ingress" "monitoring-ingress" {
+resource "kubernetes_ingress_v1" "monitoring-ingress" {
     metadata {
         name      = "monitoring-ingress"
         namespace = "monitoring"
