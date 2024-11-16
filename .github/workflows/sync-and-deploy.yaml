@@ -71,6 +71,15 @@ jobs:
             echo "stage=dev" >> $GITHUB_ENV
           fi
 
+      - name: Check for Changes
+        id: find_changes
+        run: |
+          if [ -z "$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- app)" ]; then
+            echo "::set-output name=deploy::false"
+          else
+            echo "::set-output name=deploy::true"
+          fi
+
       - name: Build, tag, and push image to Amazon ECR
         id: build-push-image
         uses: ./.github/actions/build-push-image
@@ -81,9 +90,13 @@ jobs:
           ecr-repository: ${{ env.ECR_REPOSITORY }}
           dockerfile: ./Dockerfile
           stage: ${{ env.stage }}
+          buildable: ${{ steps.find_changes.outputs.deploy }}
 
       - name: Update Kubeconfig
-        run: aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
+        run: |
+          if [ "${{ steps.find_changes.outputs.deploy }}" != "false" ]; then
+            aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
+          fi
 
       - name: Deploy to EKS
         working-directory: ./k8s
@@ -91,19 +104,27 @@ jobs:
           IMAGE: ${{ steps.build-push-image.outputs.image }}
           STAGE: ${{ env.stage }}
         run: |
-          sed -i "s|{{IMAGE}}|${IMAGE}|g" ${STAGE}/deployment.yaml
-          kubectl apply -f ${STAGE}
+          if [ "${{ steps.find_changes.outputs.deploy }}" != "false" ]; then
+            sed -i "s|{{IMAGE}}|${IMAGE}|g" ${STAGE}/deployment.yaml
+            kubectl apply -f ${STAGE}
+          fi
 
       - name: Verify Deployment
         id: verify-deployment
+        env:
+          STAGE: ${{ env.stage }}
         shell: bash
         run: |
-          kubectl rollout status deployment/app -n ${STAGE} --timeout=5m
-          if [ $? -eq 0 ]; then
-            echo "status=Deployment successful!" >> $GITHUB_OUTPUT
+          if [ "${{ steps.find_changes.outputs.deploy }}" != "false" ]; then
+            kubectl rollout status deployment/app -n ${STAGE} --timeout=5m
+            if [ $? -eq 0 ]; then
+              echo "status=Deployment successful!" >> $GITHUB_OUTPUT
+            else
+              echo "status=Deployment failed!" >> $GITHUB_OUTPUT
+              exit 1
+            fi
           else
-            echo "status=Deployment failed!" >> $GITHUB_OUTPUT
-            exit 1
+            echo "status=No changes to deploy" >> $GITHUB_OUTPUT
           fi
 
   notify-slack:
