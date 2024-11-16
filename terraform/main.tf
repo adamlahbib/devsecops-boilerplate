@@ -66,6 +66,11 @@ resource "aws_iam_instance_profile" "eks_instance_profile" {
     role = aws_iam_role.eks_role.name
 }
 
+resource "aws_iam_instance_profile" "eks_node_instance_profile" {
+    name = "eks-node-instance-profile"
+    role = aws_iam_role.worker_role.name
+}
+
 resource "aws_launch_template" "eks_launch_template" {
     block_device_mappings {
         device_name = "/dev/xvda"
@@ -101,23 +106,17 @@ resource "aws_launch_template" "eks_launch_template" {
     }
 }
 
-resource "aws_eks_node_group" "eks_node_group" {
-    cluster_name    = aws_eks_cluster.eks_cluster.name
-    node_group_name = "eks-node-group"
-    node_role_arn   = aws_iam_role.worker_role.arn
-    subnet_ids      = module.vpc.private_subnets
+resource "aws_autoscaling_group" "eks_nodes" {
+    name = "eks-node-group"
+    desired_size = 2
+    max_size     = 3
+    min_size     = 1
 
     vpc_zone_identifier = module.vpc.subnet_zones[0]
 
     launch_template {
         id = aws_launch_template.eks_launch_template.id
         version = "$Latest"
-    }
-
-    scaling_config {
-        desired_size = 2
-        max_size     = 3
-        min_size     = 1
     }
 
     tag {
