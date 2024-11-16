@@ -32,7 +32,7 @@ resource "helm_release" "falco_sidekick" {
 
     set {
         name  = "falco.webui.service.type"
-        value = "NodePort"
+        value = "ClusterIP"
     }
 }
 

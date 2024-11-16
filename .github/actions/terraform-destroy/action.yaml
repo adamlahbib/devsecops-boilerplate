@@ -23,6 +23,12 @@ inputs:
   GRAFANA_ADMIN_PASSWORD:
     description: 'Grafana admin password'
     required: true
+  CLOUDFLARE_ZONE_ID:
+    description: 'Cloudflare Zone ID'
+    required: true
+  CLOUDFLARE_TOKEN:
+    description: 'Cloudflare Token'
+    required: true
 
 runs:
   using: 'composite'
@@ -37,6 +43,8 @@ runs:
     - name: Terraform Destroy
       env:
         TF_VAR_GRAFANA_ADMIN_PASSWORD: ${{ inputs.GRAFANA_ADMIN_PASSWORD }}
+        TF_VAR_CLOUDFLARE_ZONE_ID: ${{ inputs.CLOUDFLARE_ZONE_ID }}
+        TF_VAR_CLOUDFLARE_TOKEN: ${{ inputs.CLOUDFLARE_TOKEN }}
       uses: dflook/terraform-destroy@v1
       with:
         path: ./terraform

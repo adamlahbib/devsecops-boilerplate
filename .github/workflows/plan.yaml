@@ -18,6 +18,8 @@ env:
   TFSTATE_KEY: ${{ secrets.TFSTATE_KEY }}
   GIT_TOKEN: ${{ secrets.GIT_TOKEN }}
   GRAFANA_ADMIN_PASSWORD: ${{ secrets.GRAFANA_ADMIN_PASSWORD }}
+  CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+  CLOUDFLARE_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN }}
 
 jobs: 
   terraform-plan:
@@ -51,3 +53,5 @@ jobs:
           stage: ${{ env.stage }}
           github-token: ${{ env.GIT_TOKEN }} 
           GRAFANA_ADMIN_PASSWORD: ${{ env.GRAFANA_ADMIN_PASSWORD }}
+          CLOUDFLARE_ZONE_ID: ${{ env.CLOUDFLARE_ZONE_ID }}
+          CLOUDFLARE_TOKEN: ${{ env.CLOUDFLARE_TOKEN }}

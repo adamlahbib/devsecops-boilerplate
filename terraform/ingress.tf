@@ -30,6 +30,7 @@ resource "kubernetes_ingress_v1" "dev-ingress" {
         annotations = {
             "kubernetes.io/ingress.class" = "nginx"
             "nginx.ingress.kubernetes.io/rewrite-target" = "/"
+            "alb.ingress.kubernetes.io/listen-ports" = "'[{\"HTTPS\": 443}]'"
         }
     }
 
@@ -62,6 +63,7 @@ resource "kubernetes_ingress_v1" "prod-ingress" {
         annotations = {
         "kubernetes.io/ingress.class" = "nginx"
         "nginx.ingress.kubernetes.io/rewrite-target" = "/"
+        "alb.ingress.kubernetes.io/listen-ports" = "'[{\"HTTPS\": 443}]'"
         }
     }
 
@@ -94,6 +96,7 @@ resource "kubernetes_ingress_v1" "monitoring-ingress" {
         annotations = {
         "kubernetes.io/ingress.class" = "nginx"
         "nginx.ingress.kubernetes.io/rewrite-target" = "/"
+        "alb.ingress.kubernetes.io/listen-ports" = "'[{\"HTTPS\": 443}]'"
         }
     }
 

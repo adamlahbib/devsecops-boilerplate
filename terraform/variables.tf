@@ -48,3 +48,8 @@ variable "aws_zone" {
     type        = string
     default    = "eu-west-3a"
 }
+
+variable "dns_name" {
+    description = "DNS name"
+    type        = string
+}

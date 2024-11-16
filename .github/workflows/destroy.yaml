@@ -10,6 +10,8 @@ env:
   TFSTATE_BUCKET: ${{ secrets.TFSTATE_BUCKET }}
   TFSTATE_KEY: ${{ secrets.TFSTATE_KEY }}
   GRAFANA_ADMIN_PASSWORD: ${{ secrets.GRAFANA_ADMIN_PASSWORD }}
+  CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+  CLOUDFLARE_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN }}
 
 jobs:
   terraform-destroy:
@@ -42,3 +44,5 @@ jobs:
           tfstate-key: ${{ env.TFSTATE_KEY }}
           stage: ${{ env.stage }}
           GRAFANA_ADMIN_PASSWORD: ${{ env.GRAFANA_ADMIN_PASSWORD }}
+          CLOUDFLARE_ZONE_ID: ${{ env.CLOUDFLARE_ZONE_ID }}
+          CLOUDFLARE_TOKEN: ${{ env.CLOUDFLARE_TOKEN }}
