@@ -34,6 +34,11 @@ resource "kubernetes_ingress_v1" "dev-ingress" {
         namespace = "dev"
     }
 
+    annotations = {
+        "nginx.ingress.kubernetes.io/rewrite-target" = "/"
+        "nginx.ingress.kubernetes.io/ssl-redirect" = "true"
+    }
+
     spec {
         ingress_class_name = "nginx"
         rule {
@@ -42,6 +47,7 @@ resource "kubernetes_ingress_v1" "dev-ingress" {
             http {
                 path {
                     path = "/dev/"
+                    path_type = "Prefix"
                     backend{
                         service {
                             name = "app-service"
@@ -61,6 +67,11 @@ resource "kubernetes_ingress_v1" "prod-ingress" {
         name      = "prod-ingress"
         namespace = "prod"
     }
+    
+    annotations = {
+        "nginx.ingress.kubernetes.io/rewrite-target" = "/"
+        "nginx.ingress.kubernetes.io/ssl-redirect" = "true"
+    }
 
     spec {
         ingress_class_name = "nginx"
@@ -70,6 +81,7 @@ resource "kubernetes_ingress_v1" "prod-ingress" {
             http {
                 path {
                     path = "/"
+                    path_type = "Prefix"
                     backend{
                         service {
                             name = "app-service"
@@ -90,6 +102,10 @@ resource "kubernetes_ingress_v1" "monitoring-ingress" {
         namespace = "monitoring"
     }
 
+    annotations = {
+        "nginx.ingress.kubernetes.io/rewrite-target" = "/"
+        "nginx.ingress.kubernetes.io/ssl-redirect" = "true"
+    }
 
     spec {
         ingress_class_name = "nginx"
@@ -99,6 +115,7 @@ resource "kubernetes_ingress_v1" "monitoring-ingress" {
             http {
                 path {
                     path = "/grafana/"
+                    path_type = "Prefix"
                     backend{
                         service {
                             name = "prometheus-operator-grafana"
@@ -110,6 +127,7 @@ resource "kubernetes_ingress_v1" "monitoring-ingress" {
                 }
                 path {
                     path = "/falco/"
+                    path_type = "Prefix"
                     backend{
                         service {
                             name = "falcosidekick"
