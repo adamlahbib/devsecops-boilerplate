@@ -105,7 +105,6 @@ resource "aws_eks_node_group" "eks_nodes" {
     subnet_ids      = module.vpc.private_subnets
     ami_type        = "AL2_x86_64"
     instance_types  = ["t3.micro"]
-    disk_size       = 20
     capacity_type   = "ON_DEMAND"
 
     launch_template {
