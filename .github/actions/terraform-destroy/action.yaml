@@ -36,7 +36,7 @@ runs:
 
     - name: Terraform Destroy
       env:
-        GRAFANA_ADMIN_PASSWORD: ${{ inputs.GRAFANA_ADMIN_PASSWORD }}
+        TF_VAR_GRAFANA_ADMIN_PASSWORD: ${{ inputs.GRAFANA_ADMIN_PASSWORD }}
       uses: dflook/terraform-destroy@v1
       with:
         path: ./terraform

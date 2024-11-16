@@ -1,3 +1,5 @@
+variable "GRAFANA_ADMIN_PASSWORD" { type= string } 
+
 terraform {
     backend "s3" {}
 }

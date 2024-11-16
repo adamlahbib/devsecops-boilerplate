@@ -43,7 +43,7 @@ runs:
 
     - name: Terraform Plan
       env:
-        GRAFANA_ADMIN_PASSWORD: ${{ inputs.GRAFANA_ADMIN_PASSWORD }}
+        TF_VAR_GRAFANA_ADMIN_PASSWORD: ${{ inputs.GRAFANA_ADMIN_PASSWORD }}
       uses: dflook/terraform-plan@v1
       with:
         path: ./terraform

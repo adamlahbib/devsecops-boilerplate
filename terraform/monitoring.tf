@@ -13,7 +13,7 @@ resource "helm_release" "prometheus_operator" {
 
     set {
         name  = "grafana.adminPassword"
-        value = env.GRAFANA_ADMIN_PASSWORD
+        value = var.GRAFANA_ADMIN_PASSWORD
     }
 
     set {

@@ -36,7 +36,7 @@ runs:
 
     - name: Terraform Apply
       env:
-        GRAFANA_ADMIN_PASSWORD: ${{ inputs.GRAFANA_ADMIN_PASSWORD }}
+        TF_VAR_GRAFANA_ADMIN_PASSWORD: ${{ inputs.GRAFANA_ADMIN_PASSWORD }}
       uses: dflook/terraform-apply@v1
       with:
         path: ./terraform
