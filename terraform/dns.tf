@@ -7,7 +7,6 @@ resource "cloudflare_record" "app" {
     )
     type    = "CNAME"
     proxied = true
-    allow_overwrite = true
 
     lifecycle {
         ignore_changes = [
