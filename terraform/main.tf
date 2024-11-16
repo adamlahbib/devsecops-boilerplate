@@ -109,7 +109,7 @@ resource "aws_eks_node_group" "eks_nodes" {
 
     launch_template {
         id = aws_launch_template.eks_launch_template.id
-        version = "$Latest"
+        version = "1" # static version instead of $Latest to avoid it be considered a change at every apply
     }
 
     scaling_config {

@@ -25,7 +25,7 @@ inputs:
 outputs:
   image:
     description: 'Docker image URI'
-    value: ${{ steps.image-uri.outputs.tag }}:latest
+    value: ${{ steps.image-uri.outputs.tag }}:${{ inputs.stage }}-${{ github.sha }}
 
 runs:
   using: 'composite'
@@ -58,6 +58,6 @@ runs:
       with:
         push: true
         file: ${{ inputs.dockerfile }}
-        tags: ${{ steps.image-uri.outputs.tag }}:latest, app-${{ inputs.stage }}:${{ github.sha }}
+        tags: ${{ steps.image-uri.outputs.tag }}:latest, ${{ steps.image-uri.outputs.tag }}:${{ github.sha }}, ${{ steps.image-uri.outputs.tag }}:${{ inputs.stage }}-${{ github.sha }}
         cache-from: type=gha 
         cache-to: type=gha,mode=max
