@@ -47,11 +47,15 @@ runs:
       shell: bash
       run: echo "GITHUB_TOKEN=${{ inputs.github-token }}" >> $GITHUB_ENV
 
+    - name: Append Cloudflare Token to Terraform Variables
+      shell: bash
+      run: echo "CLOUDFLARE_TOKEN=${{ inputs.CLOUDFLARE_TOKEN }}" >> ./terraform/stages/${{ inputs.stage }}.tfvars
+
     - name: Terraform Plan
       env:
         TF_VAR_GRAFANA_ADMIN_PASSWORD: ${{ inputs.GRAFANA_ADMIN_PASSWORD }}
-        TF_VAR_CLOUDFLARE_ZONE_ID: ${{ inputs.CLOUDFLARE_ZONE_ID }}
         TF_VAR_CLOUDFLARE_TOKEN: ${{ inputs.CLOUDFLARE_TOKEN }}
+        TF_VAR_CLOUDFLARE_ZONE_ID: ${{ inputs.CLOUDFLARE_ZONE_ID }}
       uses: dflook/terraform-plan@v1
       with:
         path: ./terraform
