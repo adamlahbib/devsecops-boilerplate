@@ -22,6 +22,8 @@ jobs:
   terraform-apply:
     name: Sync Terraform
     runs-on: ubuntu-latest
+    outputs:
+      message: ${{ steps.prepare-slack.outputs.status }}
     defaults:
       run:
         working-directory: ./terraform
@@ -51,6 +53,17 @@ jobs:
           GRAFANA_ADMIN_PASSWORD: ${{ env.GRAFANA_ADMIN_PASSWORD }}
           CLOUDFLARE_ZONE_ID: ${{ env.CLOUDFLARE_ZONE_ID }}
           CLOUDFLARE_TOKEN: ${{ env.CLOUDFLARE_TOKEN }}
+      
+      - name: Prepare Slack Notification
+        if: always()
+        id: prepare-slack
+        run: |
+          if [ "${{ steps.terraform-apply.outcome }}" == "success" ]; then
+            echo "status=Deployment successful!" >> $GITHUB_OUTPUT
+          else
+            echo "status=Deployment failed!" >> $GITHUB_OUTPUT
+            exit 1
+          fi
 
   deploy:
     needs: terraform-apply
@@ -128,7 +141,9 @@ jobs:
           fi
 
   notify-slack:
-    needs: deploy
+    needs:
+      - deploy
+      - terraform-apply
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -137,6 +152,6 @@ jobs:
           SLACK_CHANNEL: "#deployments"
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_USERNAME: "Deployer on Cloudflare"
-          SLACK_MESSAGE: ${{ needs.deploy.outputs.message }}
-          SLACK_COLOR: ${{ job.status }}
+          SLACK_MESSAGE: ${{ needs.deploy.outputs.message && needs.deploy.outputs.message || needs.terraform-apply.outputs.message }}
+          SLACK_COLOR: ${{ needs.deploy.outputs.message == "Deployment successful!" && "good" || "danger" }}
           SLACK_ICON: "https://avatars.githubusercontent.com/u/44036562?s=200&v=4"
