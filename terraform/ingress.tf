@@ -42,7 +42,7 @@ resource "kubernetes_ingress_v1" "dev-ingress" {
     spec {
         ingress_class_name = "nginx"
         rule {
-            host = "127.0.0.1"
+            host = "aqemia.admida0ui.de"
 
             http {
                 path {
@@ -74,7 +74,7 @@ resource "kubernetes_ingress_v1" "prod-ingress" {
     spec {
         ingress_class_name = "nginx"
         rule {
-            host = "127.0.0.1"
+            host = "aqemia.admida0ui.de"
 
             http {
                 path {
@@ -107,7 +107,7 @@ resource "kubernetes_ingress_v1" "monitoring-ingress" {
     spec {
         ingress_class_name = "nginx"
         rule {
-            host = "127.0.0.1"
+            host = "aqemia.admida0ui.de"
 
             http {
                 path {
