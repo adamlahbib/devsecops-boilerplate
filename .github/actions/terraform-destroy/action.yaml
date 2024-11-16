@@ -39,16 +39,12 @@ runs:
         aws-access-key-id: ${{ inputs.aws-access-key-id }}
         aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
         aws-region: ${{ inputs.aws-region }}
-        
-    - name: Append Cloudflare Token to Terraform Variables
-      shell: bash
-      run: echo "CLOUDFLARE_TOKEN=${{ inputs.CLOUDFLARE_TOKEN }}" >> ./terraform/stages/${{ inputs.stage }}.tfvars
 
     - name: Terraform Destroy
       env:
         TF_VAR_GRAFANA_ADMIN_PASSWORD: ${{ inputs.GRAFANA_ADMIN_PASSWORD }}
-        TF_VAR_CLOUDFLARE_TOKEN: ${{ inputs.CLOUDFLARE_TOKEN }}
         TF_VAR_CLOUDFLARE_ZONE_ID: ${{ inputs.CLOUDFLARE_ZONE_ID }}
+        TF_VAR_CLOUDFLARE_TOKEN: ${{ inputs.CLOUDFLARE_TOKEN }}
       uses: dflook/terraform-destroy@v1
       with:
         path: ./terraform

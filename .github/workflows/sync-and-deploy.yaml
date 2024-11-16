@@ -48,6 +48,9 @@ jobs:
           tfstate-bucket: ${{ env.TFSTATE_BUCKET }}
           tfstate-key: ${{ env.TFSTATE_KEY }}
           stage: ${{ env.stage }}
+          GRAFANA_ADMIN_PASSWORD: ${{ env.GRAFANA_ADMIN_PASSWORD }}
+          CLOUDFLARE_ZONE_ID: ${{ env.CLOUDFLARE_ZONE_ID }}
+          CLOUDFLARE_TOKEN: ${{ env.CLOUDFLARE_TOKEN }}
 
   deploy:
     needs: terraform-apply
@@ -78,9 +81,6 @@ jobs:
           ecr-repository: ${{ env.ECR_REPOSITORY }}
           dockerfile: ./Dockerfile
           stage: ${{ env.stage }}
-          GRAFANA_ADMIN_PASSWORD: ${{ env.GRAFANA_ADMIN_PASSWORD }}
-          CLOUDFLARE_ZONE_ID: ${{ env.CLOUDFLARE_ZONE_ID }}
-          CLOUDFLARE_TOKEN: ${{ env.CLOUDFLARE_TOKEN }}
 
       - name: Update Kubeconfig
         run: aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
