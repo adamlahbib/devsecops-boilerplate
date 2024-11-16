@@ -67,7 +67,18 @@ resource "aws_iam_instance_profile" "eks_instance_profile" {
 }
 
 resource "aws_launch_template" "eks_launch_template" {
+    block_device_mappings {
+        device_name = "/dev/xvda"
+        ebs {
+            delete_on_termination = true
+            volume_size           = 20
+            volume_type           = "gp2"
+        }
+    }
 
+    iam_instance_profile {
+        name = aws_iam_instance_profile.eks_instance_profile.name
+    }
     image_id        = data.aws_ami.node-image.id
     instance_type   = "t3.micro"
 
@@ -95,16 +106,27 @@ resource "aws_eks_node_group" "eks_node_group" {
     node_group_name = "eks-node-group"
     node_role_arn   = aws_iam_role.worker_role.arn
     subnet_ids      = module.vpc.private_subnets
+    desired_size = 2
+    min_size     = 1
+    max_size     = 3
+
+    vpc_zone_identifier = module.vpc.subnet_zones[0]
 
     launch_template {
         id = aws_launch_template.eks_launch_template.id
         version = "$Latest"
     }
 
-    scaling_config {
-        desired_size = 2
-        max_size     = 3
-        min_size     = 1
+    tag {
+        key                = "Name"
+        value              = "${aws_eks_cluster.eks_cluster.name}-node"
+        propagate_at_launch = true
+    }
+
+    tag {
+        key                = "kubernetes.io/cluster/${aws_eks_cluster.eks_cluster.name}"
+        value              = "owned"
+        propagate_at_launch = true
     }
 
     depends_on = [aws_eks_cluster.eks_cluster]
