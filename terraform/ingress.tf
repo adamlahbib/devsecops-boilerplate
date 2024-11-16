@@ -17,21 +17,26 @@ resource "kubernetes_ingress_v1" "dev-ingress" {
         name      = "dev-ingress"
         namespace = "dev"
         annotations = {
-        "kubernetes.io/ingress.class" = "nginx"
-        "nginx.ingress.kubernetes.io/rewrite-target" = "/"
+            "kubernetes.io/ingress.class" = "nginx"
+            "nginx.ingress.kubernetes.io/rewrite-target" = "/"
         }
     }
 
     spec {
+        ingress_class_name = "nginx"
         rule {
             host = "127.0.0.1"
 
             http {
                 path {
                     path = "/dev"
-                    backend {
-                        service_name = "app-service"
-                        service_port = 8080
+                    backend{
+                        service {
+                            name = "app-service"
+                            port {
+                                number = 8080
+                            }
+                        }
                     }
                 }
             }
@@ -50,15 +55,20 @@ resource "kubernetes_ingress_v1" "prod-ingress" {
     }
 
     spec {
+        ingress_class_name = "nginx"
         rule {
             host = "127.0.0.1"
 
             http {
                 path {
                     path = "/"
-                    backend {
-                        service_name = "app-service"
-                        service_port = 80
+                    backend{
+                        service {
+                            name = "app-service"
+                            port {
+                                number = 80
+                            }
+                        }
                     }
                 }
             }
@@ -76,23 +86,33 @@ resource "kubernetes_ingress_v1" "monitoring-ingress" {
         }
     }
 
+
     spec {
+        ingress_class_name = "nginx"
         rule {
             host = "127.0.0.1"
 
             http {
                 path {
                     path = "/grafana"
-                    backend {
-                        service_name = "grafana"
-                        service_port = 3000
+                    backend{
+                        service {
+                            name = "prometheus-operator-grafana"
+                            port {
+                                number = 80
+                            }
+                        }
                     }
                 }
                 path {
                     path = "/falco"
-                    backend {
-                        service_name = "falcosidekick-ui"
-                        service_port = 2801
+                    backend{
+                        service {
+                            name = "falcosidekick"
+                            port {
+                                number = 2801
+                            }
+                        }
                     }
                 }
             }
