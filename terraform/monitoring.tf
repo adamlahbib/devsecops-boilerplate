@@ -38,7 +38,7 @@ resource "helm_release" "prometheus_operator" {
             }
             "grafana.ini" = {
                 server = {
-                    root_url = join("https://",var.dns_name,"/grafana/")
+                    root_url = "https://${var.dns_name}/grafana/"
                     server_from_sub_path = true
                     domain = var.dns_name
                 }
