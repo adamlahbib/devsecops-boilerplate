@@ -34,7 +34,7 @@ resource "kubernetes_ingress_v1" "dev-ingress" {
 
             http {
                 path {
-                    path = "/dev"
+                    path = "/dev/"
                     backend{
                         service {
                             name = "app-service"
@@ -91,7 +91,7 @@ resource "kubernetes_ingress_v1" "monitoring-ingress" {
 
             http {
                 path {
-                    path = "/grafana"
+                    path = "/grafana/"
                     backend{
                         service {
                             name = "prometheus-operator-grafana"
@@ -102,7 +102,7 @@ resource "kubernetes_ingress_v1" "monitoring-ingress" {
                     }
                 }
                 path {
-                    path = "/falco"
+                    path = "/falco/"
                     backend{
                         service {
                             name = "falcosidekick"
