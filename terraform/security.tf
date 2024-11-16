@@ -2,7 +2,7 @@ resource "helm_release" "falco" {
     name       = "falco"
     repository = "https://falcosecurity.github.io/charts"
     chart      = "falco"
-    namespace  = "falco"
+    namespace  = "monitoring"
     create_namespace = true
     version    = "4.14.1"
 
@@ -16,7 +16,7 @@ resource "helm_release" "falco_sidekick" {
     name       = "falcosidekick"
     repository = "https://falcosecurity.github.io/charts"
     chart      = "falcosidekick"
-    namespace  = "falco"
+    namespace  = "monitoring"
     create_namespace = true
     version    = "0.8.9"
 
@@ -40,7 +40,7 @@ resource "helm_release" "crowdsec" {
     name       = "crowdsec"
     repository = "https://crowdsecurity.github.io/helm-charts"
     chart      = "crowdsec"
-    namespace  = "crowdsec"
+    namespace  = "monitoring"
     create_namespace = true
     version    = "0.13.0"
 

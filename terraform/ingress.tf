@@ -11,18 +11,20 @@ resource "helm_release" "ingress-nginx" {
     ]
 }
 
+
 resource "kubernetes_ingress" "dev-ingress" {
     metadata {
         name      = "dev-ingress"
         namespace = "dev"
         annotations = {
+        "kubernetes.io/ingress.class" = "nginx"
         "nginx.ingress.kubernetes.io/rewrite-target" = "/"
         }
     }
 
     spec {
         rule {
-            host = "test.local"
+            host = "127.0.0.1"
 
             http {
                 path {
@@ -42,13 +44,14 @@ resource "kubernetes_ingress" "prod-ingress" {
         name      = "prod-ingress"
         namespace = "prod"
         annotations = {
+        "kubernetes.io/ingress.class" = "nginx"
         "nginx.ingress.kubernetes.io/rewrite-target" = "/"
         }
     }
 
     spec {
         rule {
-            host = "test.local"
+            host = "127.0.0.1"
 
             http {
                 path {
@@ -68,13 +71,14 @@ resource "kubernetes_ingress" "monitoring-ingress" {
         name      = "monitoring-ingress"
         namespace = "monitoring"
         annotations = {
+        "kubernetes.io/ingress.class" = "nginx"
         "nginx.ingress.kubernetes.io/rewrite-target" = "/"
         }
     }
 
     spec {
         rule {
-            host = "test.local"
+            host = "127.0.0.1"
 
             http {
                 path {
@@ -84,32 +88,6 @@ resource "kubernetes_ingress" "monitoring-ingress" {
                         service_port = 3000
                     }
                 }
-                path {
-                    path = "/loki"
-                    backend {
-                        service_name = "loki"
-                        service_port = 3100
-                    }
-                }
-            }
-        }
-    }
-}
-
-resource "kubernetes_ingress" "falco-ingress" {
-    metadata {
-        name      = "falco-ingress"
-        namespace = "falco"
-        annotations = {
-        "nginx.ingress.kubernetes.io/rewrite-target" = "/"
-        }
-    }
-
-    spec {
-        rule {
-            host = "test.local"
-
-            http {
                 path {
                     path = "/falco"
                     backend {
