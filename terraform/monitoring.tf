@@ -30,20 +30,22 @@ resource "helm_release" "prometheus_operator" {
     create_namespace = true
     version    = "66.2.1"
 
-    set {
-        name  = "grafana.enabled"
-        value = "true"
-    }
-
-    set {
-        name = "grafana.service.type"
-        value = "ClusterIP"
-    }
-
-    set {
-        name  = "grafana.adminPassword"
-        value = var.GRAFANA_ADMIN_PASSWORD
-    }
+    value = [yamlencode({
+        grafana= {
+            enabled = true
+            service = {
+                type = "ClusterIP"
+            }
+            "grafana.ini" = {
+                server = {
+                    root_url = "https://"+var.dns_name+"/grafana/"
+                    server_from_sub_path = true
+                    domain = var.dns_name
+                }
+            }
+            adminPassword = var.GRAFANA_ADMIN_PASSWORD
+        }
+    })]
 
     set {
         name  = "prometheus.prometheusSpec.retention"
