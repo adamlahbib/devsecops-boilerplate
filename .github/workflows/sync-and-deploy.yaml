@@ -129,6 +129,7 @@ jobs:
 
   notify-slack:
     needs: deploy
+    if: always()
     runs-on: ubuntu-latest
     steps:
       - uses: rtCamp/action-slack-notify@v2
