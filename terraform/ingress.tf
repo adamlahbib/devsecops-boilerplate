@@ -23,12 +23,6 @@ resource "kubernetes_namespace" "prod" {
     }
 }
 
-resource "kubernetes_namespace" "monitoring" {
-    metadata {
-        name = "monitoring"
-    }
-}
-
 resource "kubernetes_ingress_v1" "dev-ingress" {
     metadata {
         name      = "dev-ingress"
