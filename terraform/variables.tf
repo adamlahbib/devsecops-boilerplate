@@ -42,3 +42,9 @@ variable "repository_name" {
     description = "Name of the ECR repository"
     type        = string
 }
+
+variable "aws_zone" {
+    description = "Availability zone name"
+    type        = string
+    default    = "eu-west-3a"
+}
