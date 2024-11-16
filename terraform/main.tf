@@ -103,7 +103,7 @@ resource "aws_eks_node_group" "eks_nodes" {
     node_group_name = "eks-node-group"
     node_role_arn   = aws_iam_role.worker_role.arn
     subnet_ids      = module.vpc.private_subnets
-    ami_type        = "AL2_x86_64"
+    ami_type        = "CUSTOM"
     instance_types  = ["t3.micro"]
     capacity_type   = "ON_DEMAND"
 
