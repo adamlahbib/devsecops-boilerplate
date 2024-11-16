@@ -1,5 +1,5 @@
 output "region" {
-    value = aws_eks_cluster.eks_cluster.region
+    value = "eu-west-3"
 }
 
 output "cluster_name" {
@@ -7,7 +7,7 @@ output "cluster_name" {
 }
 
 output "repository_name" {
-    value = aws_ecr_repository.ecr_repo.name
+    value = module.ecr.repository_name
 }
 
 output "cluster_ip" {
