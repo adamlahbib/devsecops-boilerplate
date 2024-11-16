@@ -17,6 +17,7 @@ env:
   TFSTATE_BUCKET: ${{ secrets.TFSTATE_BUCKET }}
   TFSTATE_KEY: ${{ secrets.TFSTATE_KEY }}
   GIT_TOKEN: ${{ secrets.GIT_TOKEN }}
+  GRAFANA_ADMIN_PASSWORD: ${{ secrets.GRAFANA_ADMIN_PASSWORD }}
 
 jobs: 
   terraform-plan:
@@ -49,3 +50,4 @@ jobs:
           tfstate-key: ${{ env.TFSTATE_KEY }}
           stage: ${{ env.stage }}
           github-token: ${{ env.GIT_TOKEN }} 
+          GRAFANA_ADMIN_PASSWORD: ${{ env.GRAFANA_ADMIN_PASSWORD }}

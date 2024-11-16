@@ -9,6 +9,7 @@ env:
   AWS_REGION: ${{ secrets.AWS_BASE_REGION }}
   TFSTATE_BUCKET: ${{ secrets.TFSTATE_BUCKET }}
   TFSTATE_KEY: ${{ secrets.TFSTATE_KEY }}
+  GRAFANA_ADMIN_PASSWORD: ${{ secrets.GRAFANA_ADMIN_PASSWORD }}
 
 jobs:
   terraform-destroy:
@@ -40,3 +41,4 @@ jobs:
           tfstate-bucket: ${{ env.TFSTATE_BUCKET }}
           tfstate-key: ${{ env.TFSTATE_KEY }}
           stage: ${{ env.stage }}
+          GRAFANA_ADMIN_PASSWORD: ${{ env.GRAFANA_ADMIN_PASSWORD }}

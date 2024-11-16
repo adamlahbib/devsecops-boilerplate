@@ -20,6 +20,9 @@ inputs:
   stage:
     description: 'Deployment stage'
     required: true
+  GRAFANA_ADMIN_PASSWORD:
+    description: 'Grafana admin password'
+    required: true
 
 runs:
   using: 'composite'
@@ -33,7 +36,7 @@ runs:
 
     - name: Terraform Apply
       env:
-        GRAFANA_ADMIN_PASSWORD: ${{ secrets.GRAFANA_ADMIN_PASSWORD }}
+        GRAFANA_ADMIN_PASSWORD: ${{ inputs.GRAFANA_ADMIN_PASSWORD }}
       uses: dflook/terraform-apply@v1
       with:
         path: ./terraform

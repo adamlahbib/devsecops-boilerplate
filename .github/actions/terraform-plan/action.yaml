@@ -23,6 +23,9 @@ inputs:
   github-token:
     description: 'GitHub token'
     required: true
+  GRAFANA_ADMIN_PASSWORD:
+    description: 'Grafana admin password'
+    required: true
 
 runs:
   using: 'composite'
@@ -40,7 +43,7 @@ runs:
 
     - name: Terraform Plan
       env:
-        GRAFANA_ADMIN_PASSWORD: ${{ secrets.GRAFANA_ADMIN_PASSWORD }}
+        GRAFANA_ADMIN_PASSWORD: ${{ inputs.GRAFANA_ADMIN_PASSWORD }}
       uses: dflook/terraform-plan@v1
       with:
         path: ./terraform
