@@ -1,14 +1,12 @@
-resource "helm_release" "ingress-nginx" {
-    name       = "ingress-nginx"
-    repository = "https://kubernetes.github.io/ingress-nginx"
-    chart      = "ingress-nginx"
-    namespace  = "ingress-nginx"
-    create_namespace = true
-    version    = "4.11.3"
+resource "helm_release" "nginx-ingress-controller" {
+    name       = "nginx-ingress-controller"
+    repository = "https://charts.bitnami.com/bitnami"
+    chart      = "nginx-ingress-controller"
 
-    values = [
-        file("./values/ingress.yaml")
-    ]
+    set {
+        name  = "service.type"
+        value = "LoadBalancer"
+    }
 }
 
 resource "kubernetes_namespace" "dev" {
@@ -27,11 +25,6 @@ resource "kubernetes_ingress_v1" "dev-ingress" {
     metadata {
         name      = "dev-ingress"
         namespace = "dev"
-        annotations = {
-            "kubernetes.io/ingress.class" = "nginx"
-            "nginx.ingress.kubernetes.io/rewrite-target" = "/"
-            "alb.ingress.kubernetes.io/listen-ports" = "'[{\"HTTPS\": 443}]'"
-        }
     }
 
     spec {
@@ -60,11 +53,6 @@ resource "kubernetes_ingress_v1" "prod-ingress" {
     metadata {
         name      = "prod-ingress"
         namespace = "prod"
-        annotations = {
-        "kubernetes.io/ingress.class" = "nginx"
-        "nginx.ingress.kubernetes.io/rewrite-target" = "/"
-        "alb.ingress.kubernetes.io/listen-ports" = "'[{\"HTTPS\": 443}]'"
-        }
     }
 
     spec {
@@ -93,11 +81,6 @@ resource "kubernetes_ingress_v1" "monitoring-ingress" {
     metadata {
         name      = "monitoring-ingress"
         namespace = "monitoring"
-        annotations = {
-        "kubernetes.io/ingress.class" = "nginx"
-        "nginx.ingress.kubernetes.io/rewrite-target" = "/"
-        "alb.ingress.kubernetes.io/listen-ports" = "'[{\"HTTPS\": 443}]'"
-        }
     }
 
 

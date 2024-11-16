@@ -21,24 +21,24 @@ jobs:
 
       - name: Bandit Security Linting
         id: bandit
-        continue-on-error: true
+        if: always()
         uses: tj-actions/bandit@v5.1
         with:
           options: "-l" # Include only high severity issues
 
       - name: Trufflehog Leaked Secret Scanning
         id: trufflehog
-        continue-on-error: true
+        if: always()
         uses: edplato/trufflehog-actions-scan@master
 
       - name: Set up Docker Buildx
-        continue-on-error: true
+        if: always()
         uses: docker/setup-buildx-action@v3
         with: 
           version: latest
 
       - name: Build Local Image
-        continue-on-error: true
+        if: always()
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -51,7 +51,7 @@ jobs:
 
       - name: Grype Container Vulnerability Scanning
         id: grype
-        continue-on-error: true
+        if: always()
         uses: anchore/scan-action@v3
         with:
           image: "localhost/app:latest"
@@ -59,16 +59,16 @@ jobs:
           severity-cutoff: "critical"
       
       - name: Compose-Up
-        continue-on-error: true
+        if: always()
         run: make run
       
       - name: Run-Tests
         id: tests
-        continue-on-error: true
+        if: always()
         run: make test
 
       - name: Compose-Down
-        continue-on-error: true
+        if: always()
         run: make clean
 
   notify-slack:
