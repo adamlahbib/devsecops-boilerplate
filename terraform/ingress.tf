@@ -82,7 +82,7 @@ resource "kubernetes_ingress_v1" "prod-ingress" {
                     backend{
                         service {
                             name = "app-service"
-                       3000     port {
+                            port {
                                 number = 80
                             }
                         }
