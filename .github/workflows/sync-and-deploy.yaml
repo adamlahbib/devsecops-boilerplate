@@ -1,4 +1,4 @@
-name: Deploy to EKS
+name: Sync Infra and Deploy to EKS
 
 on:
   push:
@@ -153,5 +153,5 @@ jobs:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_USERNAME: "Deployer on Cloudflare"
           SLACK_MESSAGE: ${{ needs.deploy.outputs.message && needs.deploy.outputs.message || needs.terraform-apply.outputs.message }}
-          SLACK_COLOR: ${{ contains(needs.deploy.outputs.message, "successful") && 'good' || 'danger' }}
+          SLACK_COLOR: ${{ contains(needs.deploy.outputs.message, 'successful') && 'good' || 'danger' }}
           SLACK_ICON: "https://avatars.githubusercontent.com/u/44036562?s=200&v=4"
