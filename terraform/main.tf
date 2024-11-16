@@ -41,12 +41,84 @@ resource "aws_iam_role_policy_attachment" "eks_policy_attachment" {
     policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
 }
 
+data "aws_ami" "node-image" {
+    owners      = ["amazon"]
+    most_recent = true
+
+    filter {
+    name   = "name"
+    values = ["amazon-eks-node-1.16-*"]
+    }
+
+    filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+    }
+
+    filter {
+    name   = "root-device-type"
+    values = ["ebs"]
+    }
+}
+
+resource "aws_iam_instance_profile" "eks_instance_profile" {
+    name = "eks-instance-profile"
+    role = aws_iam_role.eks_role.name
+}
+
+resource "aws_key_pair" "node" {
+    key_name   = "blimp-node"
+    public_key = file("~/.ssh/id_rsa.pub")
+}
+
+resource "aws_launch_template" "eks_launch_template" {
+    block_device_mappings {
+        device_name = "/dev/xvda"
+        ebs {
+            delete_on_termination = true
+            volume_size           = 20
+            volume_type           = "gp2"
+        }
+    }
+
+    iam_instance_profile {
+        name = aws_iam_instance_profile.eks_instance_profile.name
+    }
+
+    image_id        = data.aws_ami.node-image.id
+    instance_type   = "t3.micro"
+    key_name        = aws_key_pair.node.key_name
+
+    vpc_security_group_ids = [aws_security_group.eks_cluster_sg.id]
+
+    user_data = base64encode(<<-SCRIPT
+        #!/bin/bash
+        set -o xtrace
+        /etc/eks/bootstrap.sh ${var.cluster_name} \
+            --use-max-pods false \
+            --kubelet-extra-args '--max-pods=150'
+        SCRIPT
+    )
+
+    metadata_options {
+        http_put_response_hop_limit = 2
+        # Defaults
+        http_endpoint = "enabled"
+        http_tokens   = "optional"
+    }
+}
+
 resource "aws_eks_node_group" "eks_node_group" {
     cluster_name    = aws_eks_cluster.eks_cluster.name
     node_group_name = "eks-node-group"
     node_role_arn   = aws_iam_role.worker_role.arn
     subnet_ids      = module.vpc.private_subnets
     instance_types  = ["t3.micro"]
+
+    launch_template {
+        id = aws_launch_template.eks_launch_template.id
+        version = "$Latest"
+    }
 
     scaling_config {
         desired_size = 3
