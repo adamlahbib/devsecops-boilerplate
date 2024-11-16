@@ -32,12 +32,12 @@ resource "kubernetes_ingress_v1" "dev-ingress" {
     metadata {
         name      = "dev-ingress"
         namespace = "dev"
+        annotations = {
+            "nginx.ingress.kubernetes.io/rewrite-target" = "/"
+            "nginx.ingress.kubernetes.io/ssl-redirect" = "true"
+        }
     }
 
-    annotations = {
-        "nginx.ingress.kubernetes.io/rewrite-target" = "/"
-        "nginx.ingress.kubernetes.io/ssl-redirect" = "true"
-    }
 
     spec {
         ingress_class_name = "nginx"
@@ -66,12 +66,12 @@ resource "kubernetes_ingress_v1" "prod-ingress" {
     metadata {
         name      = "prod-ingress"
         namespace = "prod"
+        annotations = {
+            "nginx.ingress.kubernetes.io/rewrite-target" = "/"
+            "nginx.ingress.kubernetes.io/ssl-redirect" = "true"
+        }
     }
     
-    annotations = {
-        "nginx.ingress.kubernetes.io/rewrite-target" = "/"
-        "nginx.ingress.kubernetes.io/ssl-redirect" = "true"
-    }
 
     spec {
         ingress_class_name = "nginx"
@@ -100,12 +100,12 @@ resource "kubernetes_ingress_v1" "monitoring-ingress" {
     metadata {
         name      = "monitoring-ingress"
         namespace = "monitoring"
+        annotations = {
+            "nginx.ingress.kubernetes.io/rewrite-target" = "/"
+            "nginx.ingress.kubernetes.io/ssl-redirect" = "true"
+        }
     }
 
-    annotations = {
-        "nginx.ingress.kubernetes.io/rewrite-target" = "/"
-        "nginx.ingress.kubernetes.io/ssl-redirect" = "true"
-    }
 
     spec {
         ingress_class_name = "nginx"
