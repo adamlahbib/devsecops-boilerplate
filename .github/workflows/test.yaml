@@ -10,6 +10,8 @@ jobs:
   test-app:
     runs-on: ubuntu-latest
     name: Test Application
+    outputs:
+      message: "Bandit Security Linting: ${{ steps.bandit.outcome }}\nTrufflehog Leaked Secret Scanning: ${{ steps.trufflehog.outcome }}\nGrype Container Vulnerability Scanning: ${{ steps.grype.outcome }}\nApplication Tests: ${{ steps.tests.outcome }}"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -18,19 +20,25 @@ jobs:
           ref: ${{ github.head_ref }}
 
       - name: Bandit Security Linting
+        id: bandit
+        continue-on-error: true
         uses: tj-actions/bandit@v5.1
         with:
           options: "-l" # Include only high severity issues
 
       - name: Trufflehog Leaked Secret Scanning
+        id: trufflehog
+        continue-on-error: true
         uses: edplato/trufflehog-actions-scan@master
 
       - name: Set up Docker Buildx
+        continue-on-error: true
         uses: docker/setup-buildx-action@v3
         with: 
           version: latest
 
       - name: Build Local Image
+        continue-on-error: true
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -42,18 +50,37 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Grype Container Vulnerability Scanning
+        id: grype
+        continue-on-error: true
         uses: anchore/scan-action@v3
         with:
           image: "localhost/app:latest"
-          fail-build: false
+          fail-build: true
           severity-cutoff: "critical"
       
       - name: Compose-Up
+        continue-on-error: true
         run: make run
       
       - name: Run-Tests
+        id: tests
+        continue-on-error: true
         run: make test
 
       - name: Compose-Down
-        if: always()
+        continue-on-error: true
         run: make clean
+
+  notify-slack:
+    needs: test-app
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_CHANNEL: "#qa"
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_USERNAME: "Test Pipeline Results"
+          SLACK_MESSAGE: ${{ needs.test-app.outputs.message }}
+          SLACK_COLOR: ${{ job.status }}
+          SLACK_ICON: "https://avatars.githubusercontent.com/u/44036562?s=200&v=4"
