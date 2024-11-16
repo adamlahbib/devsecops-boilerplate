@@ -50,7 +50,7 @@ runs:
       id: image-uri
       shell: bash
       run: |
-        tag=${{ steps.login-ecr.outputs.registry }}/app-${{ inputs.stage }}
+        tag=${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr-repository }}
         echo "tag=$tag" >> $GITHUB_OUTPUT
       
     - name: Build and Push Image
@@ -58,6 +58,6 @@ runs:
       with:
         push: true
         file: ${{ inputs.dockerfile }}
-        tags: ${{ steps.image-uri.outputs.tag }}:latest, ${{ steps.image-uri.outputs.tag }}:${{ github.sha }}
+        tags: ${{ steps.image-uri.outputs.tag }}:latest, app-${{ inputs.stage }}:${{ github.sha }}
         cache-from: type=gha 
         cache-to: type=gha,mode=max
