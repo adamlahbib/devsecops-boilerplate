@@ -39,6 +39,8 @@ runs:
       run: echo "GITHUB_TOKEN=${{ inputs.github-token }}" >> $GITHUB_ENV
 
     - name: Terraform Plan
+      env:
+        GRAFANA_ADMIN_PASSWORD: ${{ secrets.GRAFANA_ADMIN_PASSWORD }}
       uses: dflook/terraform-plan@v1
       with:
         path: ./terraform
