@@ -38,10 +38,9 @@ spec:
         solvers:
         - dns01:
             cloudflare:
-            email: ${var.CLOUDFLARE_EMAIL}
-            apiTokenSecretRef:
-                name: cloudflare-api-token
-                key: api-token
+                apiTokenSecretRef:
+                    name: cloudflare-api-token
+                    key: api-token
 YAML
     depends_on = [helm_release.cert_manager, kubernetes_secret.cloudflare_api_token]
 }
