@@ -12,6 +12,16 @@ resource "helm_release" "cert_manager" {
     }
 }
 
+resource "kubernetes_secret" "cloudflare_api_token" {
+    metadata {
+        name      = "cloudflare-api-token"
+        namespace = "cert-manager"
+    }
+    data = {
+        api-token = base64encode(var.CLOUDFLARE_API_TOKEN)
+    }
+}
+
 resource "kubectl_manifest" "cluster_issuer" {
     yaml_body = <<YAML
 apiVersion: cert-manager.io/v1
@@ -29,7 +39,9 @@ spec:
         - dns01:
             cloudflare:
             email: ${var.CLOUDFLARE_EMAIL}
-            apiToken: ${var.CLOUDFLARE_TOKEN}
+            apiTokenSecretRef:
+                name: cloudflare-api-token
+                key: api-token
 YAML
-    depends_on = [helm_release.cert_manager]
+    depends_on = [helm_release.cert_manager, kubernetes_secret.cloudflare_api_token]
 }
