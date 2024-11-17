@@ -25,26 +25,27 @@ resource "kubernetes_manifest" "cluster_issuer" {
     manifest = {
         apiVersion = "cert-manager.io/v1"
         kind       = "ClusterIssuer"
-
-        metadata {
+        metadata = {
             name      = "letsencrypt-prod"
             namespace = "cert-manager"
         }
-        spec {
-            acme {
-                    email      = var.CLOUDFLARE_EMAIL
-                    server     = "https://acme-v02.api.letsencrypt.org/directory"
-                    privateKeySecretRef {
+        spec = {
+            acme = {
+                email      = var.CLOUDFLARE_EMAIL
+                server     = "https://acme-v02.api.letsencrypt.org/directory"
+                privateKeySecretRef = {
                     name = "letsencrypt-prod-key"
                 }
-                solvers {
-                    dns01 {
-                        cloudflare {
-                            email    = var.CLOUDFLARE_EMAIL
-                            apiToken = var.CLOUDFLARE_TOKEN
+                solvers = [
+                    {
+                        dns01 = {
+                            cloudflare = {
+                                email    = var.CLOUDFLARE_EMAIL
+                                apiToken = var.CLOUDFLARE_TOKEN
+                            }
                         }
                     }
-                }
+                ]
             }
         }
     }
