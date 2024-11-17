@@ -1,17 +1,16 @@
-module "cert_manager" {
-    source = "."
-
-    namespace = "cert-manager"
+resource "helm_release" "cert_manager" {
+    name       = "cert-manager"
+    repository = "https://charts.jetstack.io"
+    chart      = "cert-manager"
+    version    = "v1.12.3"
+    namespace  = "cert-manager"
     create_namespace = true
 
-    name = "cert-manager"
-    chart = "https://charts.jetstack.io"
-    target_revision = "v1.15.2"
-
-    install_crd = true
-    create_ingress = false
+    set {
+        name  = "installCRDs"
+        value = "true"
+    }
 }
-
 
 resource "kubernetes_manifest" "cluster_issuer" {
     manifest = {
@@ -41,5 +40,6 @@ resource "kubernetes_manifest" "cluster_issuer" {
             }
         }
     }
-    depends_on = [module.cert_manager]
+    skip_kind_check = true # because it depends on the cert-manager CRDs being installed
+    depends_on = [helm_release.cert_manager]
 }
