@@ -40,6 +40,11 @@ resource "helm_release" "falco" {
         value = var.slack_icon
     }
 
+    set {
+        name = "falcosidekick.webui.redis.storageEnabled"
+        value = "false"
+    }
+
 }
 
 resource "helm_release" "crowdsec" {
