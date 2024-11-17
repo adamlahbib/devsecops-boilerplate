@@ -7,17 +7,12 @@ resource "kubernetes_namespace" "cert_manager" {
     }
 }
 
-resource "helm_release" "cert_manager" {
-    name       = "cert-manager"
-    repository = "https://charts.jetstack.io"
-    chart      = "cert-manager"
-    version    = "v1.12.3"
-    namespace  = kubernetes_namespace.cert_manager.metadata.0.name
 
-    set {
-        name  = "installCRDs"
-        value = "true"
-    }
+module "cert_manager" {
+    source = "terraform-iaac/cert-manager/kubernetes"
+    cluster_issuer_email = var.CLOUDFLARE_EMAIL
+    cluster_issuer_name = "letsencrypt-prod"
+    cluster_issuer_private_key_secret_name = "letsencrypt-prod-key"
 }
 
 
@@ -49,5 +44,5 @@ resource "kubernetes_manifest" "cluster_issuer" {
             }
         }
     }
-    depends_on = [helm_release.cert_manager]
+    depends_on = [module.cert_manager]
 }
