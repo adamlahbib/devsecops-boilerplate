@@ -172,5 +172,5 @@ resource "kubernetes_ingress_v1" "monitoring-ingress" {
             }
         }
     }
-    depends_on = [helm_release.tailscale_operator, helm_release.prometheus_operator]
+    depends_on = [helm_release.tailscale_operator, helm_release.prometheus_operator, helm_release.falco]
 }
