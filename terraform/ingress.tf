@@ -128,7 +128,7 @@ resource "kubernetes_ingress_v1" "monitoring-ingress" {
         annotations = {
             "nginx.ingress.kubernetes.io/ssl-redirect"    = "false"
             "nginx.ingress.kubernetes.io/force-ssl-redirect" = "false"
-            "nginx.ingress.kubernetes.io/backend-protocol" = "HTTPS"
+            "nginx.ingress.kubernetes.io/backend-protocol" = "HTTP"
             "tailscale.com/tags" = "tag:aqemia-monitoring"
         }
     }
