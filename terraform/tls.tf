@@ -1,18 +1,14 @@
-resource "kubernetes_namespace" "cert_manager" {
-    metadata {
-        name = "cert-manager"
-        labels = {
-            "name" = "cert-manager"
-        }
-    }
-}
-
-
 module "cert_manager" {
     source = "terraform-iaac/cert-manager/kubernetes"
-    cluster_issuer_email = var.CLOUDFLARE_EMAIL
-    cluster_issuer_name = "letsencrypt-prod"
-    cluster_issuer_private_key_secret_name = "letsencrypt-prod-key"
+    namespace = "cert-manager"
+    create_namespace = true
+
+    name = "cert-manager"
+    chart = "https://charts.jetstack.io"
+    target_revision = "v1.15.2"
+
+    install_crd = true
+    create_ingress = false
 }
 
 
