@@ -19,10 +19,10 @@ resource "helm_release" "nginx-ingress-controller" {
 }
 
 data "kubernetes_service" "nginx_ingress" {
-  metadata {
+    metadata {
     name      = "nginx-ingress-controller"
     namespace = "default"
-  }
+    }
 }
 
 resource "kubernetes_namespace" "dev" {

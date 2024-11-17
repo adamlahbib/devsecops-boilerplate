@@ -1,5 +1,6 @@
 module "cert_manager" {
-    source = "terraform-iaac/cert-manager/kubernetes"
+    source = "."
+
     namespace = "cert-manager"
     create_namespace = true
 
