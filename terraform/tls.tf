@@ -18,7 +18,7 @@ resource "kubernetes_secret" "cloudflare_api_token" {
         namespace = "cert-manager"
     }
     data = {
-        api-token = base64encode(var.CLOUDFLARE_API_TOKEN)
+        api-token = base64encode(var.CLOUDFLARE_TOKEN)
     }
 }
 
