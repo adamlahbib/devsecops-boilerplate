@@ -79,6 +79,7 @@ resource "kubernetes_ingress_v1" "dev-ingress" {
             }
         }
     }
+    depends_on = [helm_release.nginx-ingress-controller, kubernetes_namespace.dev]
 }
 
 resource "kubernetes_ingress_v1" "prod-ingress" {
@@ -123,6 +124,7 @@ resource "kubernetes_ingress_v1" "prod-ingress" {
             }
         }
     }
+    depends_on = [helm_release.nginx-ingress-controller, kubernetes_namespace.prod]
 }
 
 resource "kubernetes_ingress_v1" "monitoring-ingress" {
@@ -179,4 +181,5 @@ resource "kubernetes_ingress_v1" "monitoring-ingress" {
             }
         }
     }
+    depends_on = [helm_release.nginx-ingress-controller, helm_release.prometheus_operator]
 }
