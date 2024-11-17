@@ -43,11 +43,9 @@ resource "kubernetes_ingress_v1" "dev-ingress" {
         namespace = "dev"
         annotations = {
             "nginx.ingress.kubernetes.io/rewrite-target" = "/"
-            "nginx.ingress.kubernetes.io/ssl-redirect"    = "true"
+            "nginx.ingress.kubernetes.io/ssl-redirect"    = "false"
             "nginx.ingress.kubernetes.io/force-ssl-redirect" = "false"
             "nginx.ingress.kubernetes.io/backend-protocol" = "HTTPS"
-            "nginx.ingress.kubernetes.io/configuration-snippet" = "if ($http_x_forwarded_proto = 'http') {return 301 https://$host$request_uri;}"
-            "openappsec.io/policy" = "open-appsec-best-practice-policy"
         }
     }
 
@@ -88,12 +86,9 @@ resource "kubernetes_ingress_v1" "prod-ingress" {
         namespace = "prod"
         annotations = {
             "nginx.ingress.kubernetes.io/rewrite-target" = "/"
-            "nginx.ingress.kubernetes.io/ssl-redirect"    = "true"
+            "nginx.ingress.kubernetes.io/ssl-redirect"    = "false"
             "nginx.ingress.kubernetes.io/force-ssl-redirect" = "false"
             "nginx.ingress.kubernetes.io/backend-protocol" = "HTTPS"
-            "nginx.ingress.kubernetes.io/configuration-snippet" = "if ($http_x_forwarded_proto = 'http') {return 301 https://$host$request_uri;}"
-            "openappsec.io/policy" = "open-appsec-best-practice-policy"
-
         }
     }
     
@@ -134,11 +129,9 @@ resource "kubernetes_ingress_v1" "monitoring-ingress" {
         namespace = "monitoring"
         annotations = {
             "nginx.ingress.kubernetes.io/rewrite-target" = "/"
-            "nginx.ingress.kubernetes.io/ssl-redirect"    = "true"
+            "nginx.ingress.kubernetes.io/ssl-redirect"    = "false"
             "nginx.ingress.kubernetes.io/force-ssl-redirect" = "false"
             "nginx.ingress.kubernetes.io/backend-protocol" = "HTTPS"
-            "nginx.ingress.kubernetes.io/configuration-snippet" = "if ($http_x_forwarded_proto = 'http') {return 301 https://$host$request_uri;}"
-            "openappsec.io/policy" = "open-appsec-best-practice-policy"
         }
     }
 
