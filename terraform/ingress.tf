@@ -62,7 +62,7 @@ resource "kubernetes_ingress_v1" "dev-ingress" {
 
             http {
                 path {
-                    path = "/dev(/|$)(.*)"
+                    path = "/dev/"
                     path_type = "Prefix"
                     backend{
                         service {
@@ -146,7 +146,7 @@ resource "kubernetes_ingress_v1" "monitoring-ingress" {
 
             http {
                 path {
-                    path = "/grafana(/|$)(.*)"
+                    path = "/grafana/"
                     path_type = "Prefix"
                     backend{
                         service {
@@ -158,7 +158,7 @@ resource "kubernetes_ingress_v1" "monitoring-ingress" {
                     }
                 }
                 path {
-                    path = "/falco(/|$)(.*)"
+                    path = "/falco/"
                     path_type = "Prefix"
                     backend{
                         service {
