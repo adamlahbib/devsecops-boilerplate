@@ -42,7 +42,6 @@ resource "kubernetes_ingress_v1" "dev-ingress" {
         name      = "dev-ingress"
         namespace = "dev"
         annotations = {
-            "nginx.ingress.kubernetes.io/rewrite-target" = "/"
             "nginx.ingress.kubernetes.io/ssl-redirect"    = "false"
             "nginx.ingress.kubernetes.io/force-ssl-redirect" = "false"
             "nginx.ingress.kubernetes.io/backend-protocol" = "HTTPS"
@@ -85,7 +84,6 @@ resource "kubernetes_ingress_v1" "prod-ingress" {
         name      = "prod-ingress"
         namespace = "prod"
         annotations = {
-            "nginx.ingress.kubernetes.io/rewrite-target" = "/"
             "nginx.ingress.kubernetes.io/ssl-redirect"    = "false"
             "nginx.ingress.kubernetes.io/force-ssl-redirect" = "false"
             "nginx.ingress.kubernetes.io/backend-protocol" = "HTTPS"
@@ -128,7 +126,6 @@ resource "kubernetes_ingress_v1" "monitoring-ingress" {
         name      = "monitoring-ingress"
         namespace = "monitoring"
         annotations = {
-            "nginx.ingress.kubernetes.io/rewrite-target" = "/"
             "nginx.ingress.kubernetes.io/ssl-redirect"    = "false"
             "nginx.ingress.kubernetes.io/force-ssl-redirect" = "false"
             "nginx.ingress.kubernetes.io/backend-protocol" = "HTTPS"
