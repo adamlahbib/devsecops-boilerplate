@@ -14,3 +14,10 @@ aws_zone = "eu-west-3a"
 
 dns_name = "aqemia.admida0ui.de" # sample subdomain based on my personal blog for test purposes.
 
+slack_channel = "#falco-alerts"
+
+slack_username = "falco-alerts"
+
+slack_icon = "https://avatars.githubusercontent.com/u/42391047?s=200&v=4"
+
+tailnet = "tailcf97d7.ts.net"

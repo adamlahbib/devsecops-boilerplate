@@ -50,16 +50,6 @@ resource "helm_release" "prometheus_operator" {
     })]
 
     set {
-        name  = "prometheus.prometheusSpec.retention"
-        value = "15d"
-    }
-
-    set {
-        name  = "prometheus.prometheusSpec.persistence.enabled"
-        value = "false"
-    }
-
-    set {
         name  = "alertmanager.enabled"
         value = "true"
     }

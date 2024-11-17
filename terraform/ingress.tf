@@ -129,20 +129,20 @@ resource "kubernetes_ingress_v1" "monitoring-ingress" {
             "nginx.ingress.kubernetes.io/ssl-redirect"    = "false"
             "nginx.ingress.kubernetes.io/force-ssl-redirect" = "false"
             "nginx.ingress.kubernetes.io/backend-protocol" = "HTTP"
+            "tailscale.com/tags" = "tag:aqemia-monitoring"
         }
     }
 
 
     spec {
-        ingress_class_name = "nginx"
+        ingress_class_name = "tailscale"
 
         tls {
-            hosts      = ["${var.dns_name}"]
-            secret_name = "tls-cert"
+            hosts      = ["${var.project_name}.${var.tailnet}"]
         }
 
         rule {
-            host = var.dns_name
+            host = "${var.project_name}.${var.tailnet}"
 
             http {
                 path {
@@ -162,9 +162,9 @@ resource "kubernetes_ingress_v1" "monitoring-ingress" {
                     path_type = "Prefix"
                     backend{
                         service {
-                            name = "falcosidekick"
+                            name = "falco-falcosidekick-ui"
                             port {
-                                number = 2801
+                                number = 2802
                             }
                         }
                     }
@@ -172,5 +172,5 @@ resource "kubernetes_ingress_v1" "monitoring-ingress" {
             }
         }
     }
-    depends_on = [helm_release.nginx-ingress-controller, helm_release.prometheus_operator]
+    depends_on = [helm_release.tailscale_operator, helm_release.prometheus_operator]
 }

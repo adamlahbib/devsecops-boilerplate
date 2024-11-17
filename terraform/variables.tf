@@ -1,3 +1,18 @@
+variable "GRAFANA_ADMIN_PASSWORD" { type= string } 
+variable "CLOUDFLARE_ZONE_ID" { type= string }
+variable "CLOUDFLARE_TOKEN" { type= string }
+variable "CLOUDFLARE_EMAIL" { type= string }
+variable "CLOUDFLARE_API_TOKEN" { type= string }
+variable "SLACK_WEBHOOK" { type= string }
+variable "TAILSCALE_CLIENT_ID" { type= string }
+variable "TAILSCALE_CLIENT_SECRET" { type= string }
+
+variable "project_name" {
+    description = "Name of the project"
+    type        = string
+    default     = "aqemia"
+}
+
 variable "aws_region" {
     description = "AWS Region to deploy resources"
     type        = string
@@ -51,5 +66,25 @@ variable "aws_zone" {
 
 variable "dns_name" {
     description = "DNS name"
+    type        = string
+}
+
+variable "slack_channel" {
+    description = "Slack channel"
+    type        = string
+}
+
+variable "slack_username" {
+    description = "Slack username"
+    type        = string
+}
+
+variable "slack_icon" {
+    description = "Slack icon"
+    type        = string
+}
+
+variable "tailnet" {
+    description = "Tailnet"
     type        = string
 }

@@ -10,30 +10,36 @@ resource "helm_release" "falco" {
         name  = "ebpf.enabled"
         value = "true"
     }
-}
-
-resource "helm_release" "falco_sidekick" {
-    name       = "falcosidekick"
-    repository = "https://falcosecurity.github.io/charts"
-    chart      = "falcosidekick"
-    namespace  = "monitoring"
-    create_namespace = true
-    version    = "0.8.9"
-
     set {
         name  = "falcosidekick.enabled"
         value = "true"
     }
 
     set {
-        name  = "falco.webui.enabled"
+        name  = "falcosidekick.webui.enabled"
         value = "true"
     }
 
     set {
-        name  = "falco.webui.service.type"
-        value = "ClusterIP"
+        name  = "falcosidekick.config.slack.webhookurl"
+        value = var.SLACK_WEBHOOK
     }
+
+    set {
+        name = "falcosidekick.config.slack.channel"
+        value = var.slack_channel
+    }
+
+    set {
+        name = "falcosidekick.config.slack.username"
+        value = var.slack_username
+    }
+
+    set {
+        name = "falcosidekick.config.slack.icon"
+        value = var.slack_icon
+    }
+
 }
 
 resource "helm_release" "crowdsec" {

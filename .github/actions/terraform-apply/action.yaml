@@ -35,6 +35,15 @@ inputs:
   CLOUDFLARE_API_TOKEN:
     description: 'Cloudflare API Token'
     required: true
+  SLACK_WEBHOOK:
+    description: 'Slack Webhook'
+    required: true
+  TAILSCALE_CLIENT_ID:
+    description: 'Tailscale Client ID'
+    required: true
+  TAILSCALE_CLIENT_SECRET:
+    description: 'Tailscale Client Secret'
+    required: true
 
 runs:
   using: 'composite'
@@ -53,6 +62,9 @@ runs:
         TF_VAR_CLOUDFLARE_TOKEN: ${{ inputs.CLOUDFLARE_TOKEN }}
         TF_VAR_CLOUDFLARE_EMAIL: ${{ inputs.CLOUDFLARE_EMAIL }}
         TF_VAR_CLOUDFLARE_API_TOKEN: ${{ inputs.CLOUDFLARE_API_TOKEN }}
+        TF_VAR_SLACK_WEBHOOK: ${{ inputs.SLACK_WEBHOOK }}
+        TF_VAR_TAILSCALE_CLIENT_ID: ${{ inputs.TAILSCALE_CLIENT_ID }}
+        TF_VAR_TAILSCALE_CLIENT_SECRET: ${{ inputs.TAILSCALE_CLIENT_SECRET }}
       uses: dflook/terraform-apply@v1
       with:
         path: ./terraform

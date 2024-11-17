@@ -19,6 +19,9 @@ env:
   CLOUDFLARE_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN }}
   CLOUDFLARE_EMAIL: ${{ secrets.CLOUDFLARE_EMAIL }}
   CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+  SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+  TAILSCALE_CLIENT_ID: ${{ secrets.TAILSCALE_CLIENT_ID }}
+  TAILSCALE_CLIENT_SECRET: ${{ secrets.TAILSCALE_CLIENT_SECRET }}
 
 jobs: 
   terraform-apply:
@@ -57,7 +60,10 @@ jobs:
           CLOUDFLARE_TOKEN: ${{ env.CLOUDFLARE_TOKEN }}
           CLOUDFLARE_EMAIL: ${{ env.CLOUDFLARE_EMAIL }}
           CLOUDFLARE_API_TOKEN: ${{ env.CLOUDFLARE_API_TOKEN }}
-      
+          SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
+          TAILSCALE_CLIENT_ID: ${{ env.TAILSCALE_CLIENT_ID }}
+          TAILSCALE_CLIENT_SECRET: ${{ env.TAILSCALE_CLIENT_SECRET }}
+
       - name: Prepare Slack Notification
         if: always()
         id: prepare-slack
@@ -156,7 +162,7 @@ jobs:
       - uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_CHANNEL: "#deployments"
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
           SLACK_USERNAME: "Deployer on Cloudflare"
           SLACK_MESSAGE: ${{ needs.deploy.outputs.message && needs.deploy.outputs.message || needs.terraform-apply.outputs.message }}
           SLACK_COLOR: ${{ contains(needs.deploy.outputs.message, 'successful') && 'good' || 'danger' }}
