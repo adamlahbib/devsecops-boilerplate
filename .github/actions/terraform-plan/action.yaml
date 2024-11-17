@@ -32,6 +32,9 @@ inputs:
   CLOUDFLARE_TOKEN:
     description: 'Cloudflare Token'
     required: true
+  CLOUDFLARE_EMAIL:
+    description: 'Cloudflare Email'
+    required: true
 
 runs:
   using: 'composite'
@@ -52,6 +55,7 @@ runs:
         TF_VAR_GRAFANA_ADMIN_PASSWORD: ${{ inputs.GRAFANA_ADMIN_PASSWORD }}
         TF_VAR_CLOUDFLARE_ZONE_ID: ${{ inputs.CLOUDFLARE_ZONE_ID }}
         TF_VAR_CLOUDFLARE_TOKEN: ${{ inputs.CLOUDFLARE_TOKEN }}
+        TF_VAR_CLOUDFLARE_EMAIL: ${{ inputs.CLOUDFLARE_EMAIL }}
       uses: dflook/terraform-plan@v1
       with:
         path: ./terraform

@@ -17,6 +17,7 @@ env:
   EKS_CLUSTER_NAME: ${{ secrets.EKS_CLUSTER_NAME }}
   CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
   CLOUDFLARE_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN }}
+  CLOUDFLARE_EMAIL: ${{ secrets.CLOUDFLARE_EMAIL }}
 
 jobs: 
   terraform-apply:
@@ -53,6 +54,7 @@ jobs:
           GRAFANA_ADMIN_PASSWORD: ${{ env.GRAFANA_ADMIN_PASSWORD }}
           CLOUDFLARE_ZONE_ID: ${{ env.CLOUDFLARE_ZONE_ID }}
           CLOUDFLARE_TOKEN: ${{ env.CLOUDFLARE_TOKEN }}
+          CLOUDFLARE_EMAIL: ${{ env.CLOUDFLARE_EMAIL }}
       
       - name: Prepare Slack Notification
         if: always()
@@ -74,6 +76,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       
       - name: Determine Deployment Stage
         id: determine_stage
@@ -88,9 +92,9 @@ jobs:
         id: find_changes
         run: |
           if [ -z "$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- app)" ]; then
-            echo "::set-output name=deploy::false"
+            echo "deploy=false" >> $GITHUB_ENV
           else
-            echo "::set-output name=deploy::true"
+            echo "deploy=true" >> $GITHUB_ENV
           fi
 
       - name: Build, tag, and push image to Amazon ECR
@@ -103,11 +107,11 @@ jobs:
           ecr-repository: ${{ env.ECR_REPOSITORY }}
           dockerfile: ./Dockerfile
           stage: ${{ env.stage }}
-          buildable: ${{ steps.find_changes.outputs.deploy }}
+          buildable: ${{ env.deploy }}
 
       - name: Update Kubeconfig
         run: |
-          if [ "${{ steps.find_changes.outputs.deploy }}" != "false" ]; then
+          if [ "${{ env.deploy }}" != "false" ]; then
             aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
           fi
 
@@ -117,7 +121,7 @@ jobs:
           IMAGE: ${{ steps.build-push-image.outputs.image }}
           STAGE: ${{ env.stage }}
         run: |
-          if [ "${{ steps.find_changes.outputs.deploy }}" != "false" ]; then
+          if [ "${{ env.deploy }}" != "false" ]; then
             sed -i "s|{{IMAGE}}|${IMAGE}|g" ${STAGE}/deployment.yaml
             kubectl apply -f ${STAGE}
           fi
@@ -128,7 +132,7 @@ jobs:
           STAGE: ${{ env.stage }}
         shell: bash
         run: |
-          if [ "${{ steps.find_changes.outputs.deploy }}" != "false" ]; then
+          if [ "${{ env.deploy }}" != "false" ]; then
             kubectl rollout status deployment/app -n ${STAGE} --timeout=5m
             if [ $? -eq 0 ]; then
               echo "status=Deployment successful!" >> $GITHUB_OUTPUT

@@ -1,6 +1,7 @@
 variable "GRAFANA_ADMIN_PASSWORD" { type= string } 
 variable "CLOUDFLARE_ZONE_ID" { type= string }
 variable "CLOUDFLARE_TOKEN" { type= string }
+variable "CLOUDFLARE_EMAIL" { type= string }
 
 terraform {
     backend "s3" {}

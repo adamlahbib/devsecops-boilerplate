@@ -7,6 +7,15 @@ resource "helm_release" "nginx-ingress-controller" {
         name  = "service.type"
         value = "LoadBalancer"
     }
+
+    set {
+        name  = "controller.publishService.enabled"
+        value = "true"
+    }
+    set {
+        name  = "controller.defaultTLS.secret"
+        value = "default/tls-cert"
+    }
 }
 
 data "kubernetes_service" "nginx_ingress" {
@@ -34,15 +43,32 @@ resource "kubernetes_ingress_v1" "dev-ingress" {
         namespace = "dev"
         annotations = {
             "nginx.ingress.kubernetes.io/rewrite-target" = "/"
-            "nginx.ingress.kubernetes.io/ssl-redirect" = "true"
+            "nginx.ingress.kubernetes.io/ssl-redirect"    = "true"
+            "nginx.ingress.kubernetes.io/force-ssl-redirect" = "true"
+            "nginx.ingress.kubernetes.io/secure-backends"                 = "true"
+            "nginx.ingress.kubernetes.io/proxy-body-size"                 = "10m"
+            "nginx.ingress.kubernetes.io/ssl-protocols"                   = "TLSv1.2 TLSv1.3"
+            "nginx.ingress.kubernetes.io/ssl-ciphers"                     = "ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384"
+            "nginx.ingress.kubernetes.io/proxy-read-timeout"              = "30"
+            "nginx.ingress.kubernetes.io/proxy-send-timeout"              = "30"
+            "nginx.ingress.kubernetes.io/hsts"                            = "true"
+            "nginx.ingress.kubernetes.io/hsts-max-age"                    = "63072000"
+            "nginx.ingress.kubernetes.io/hsts-include-subdomains"         = "true"
+            "nginx.ingress.kubernetes.io/hsts-preload"                    = "true"        
         }
     }
 
 
     spec {
         ingress_class_name = "nginx"
+
+        tls {
+            hosts      = ["${var.dns_name}"]
+            secret_name = "tls-cert"
+        }
+
         rule {
-            host = "aqemia.admida0ui.de"
+            host = var.dns_name
 
             http {
                 path {
@@ -68,15 +94,32 @@ resource "kubernetes_ingress_v1" "prod-ingress" {
         namespace = "prod"
         annotations = {
             "nginx.ingress.kubernetes.io/rewrite-target" = "/"
-            "nginx.ingress.kubernetes.io/ssl-redirect" = "true"
+            "nginx.ingress.kubernetes.io/ssl-redirect"    = "true"
+            "nginx.ingress.kubernetes.io/force-ssl-redirect" = "true"
+            "nginx.ingress.kubernetes.io/secure-backends"                 = "true"
+            "nginx.ingress.kubernetes.io/proxy-body-size"                 = "10m"
+            "nginx.ingress.kubernetes.io/ssl-protocols"                   = "TLSv1.2 TLSv1.3"
+            "nginx.ingress.kubernetes.io/ssl-ciphers"                     = "ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384"
+            "nginx.ingress.kubernetes.io/proxy-read-timeout"              = "30"
+            "nginx.ingress.kubernetes.io/proxy-send-timeout"              = "30"
+            "nginx.ingress.kubernetes.io/hsts"                            = "true"
+            "nginx.ingress.kubernetes.io/hsts-max-age"                    = "63072000"
+            "nginx.ingress.kubernetes.io/hsts-include-subdomains"         = "true"
+            "nginx.ingress.kubernetes.io/hsts-preload"                    = "true"        
         }
     }
     
 
     spec {
         ingress_class_name = "nginx"
+
+        tls {
+            hosts      = ["${var.dns_name}"]
+            secret_name = "tls-cert"
+        }
+
         rule {
-            host = "aqemia.admida0ui.de"
+            host = var.dns_name
 
             http {
                 path {
@@ -102,15 +145,35 @@ resource "kubernetes_ingress_v1" "monitoring-ingress" {
         namespace = "monitoring"
         annotations = {
             "nginx.ingress.kubernetes.io/rewrite-target" = "/"
-            "nginx.ingress.kubernetes.io/ssl-redirect" = "true"
+            "nginx.ingress.kubernetes.io/ssl-redirect"    = "true"
+            "nginx.ingress.kubernetes.io/force-ssl-redirect" = "true"
+            "nginx.ingress.kubernetes.io/secure-backends"                 = "true"
+            "nginx.ingress.kubernetes.io/proxy-body-size"                 = "10m"
+            "nginx.ingress.kubernetes.io/ssl-protocols"                   = "TLSv1.2 TLSv1.3"
+            "nginx.ingress.kubernetes.io/ssl-ciphers"                     = "ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384"
+            "nginx.ingress.kubernetes.io/proxy-read-timeout"              = "30"
+            "nginx.ingress.kubernetes.io/proxy-send-timeout"              = "30"
+            "nginx.ingress.kubernetes.io/hsts"                            = "true"
+            "nginx.ingress.kubernetes.io/hsts-max-age"                    = "63072000"
+            "nginx.ingress.kubernetes.io/hsts-include-subdomains"         = "true"
+            "nginx.ingress.kubernetes.io/hsts-preload"                    = "true"
+            "nginx.ingress.kubernetes.io/proxy-set-headers" = "configmap/custom-headers"
+            "nginx.ingress.kubernetes.io/proxy-buffer-size" = "16k"
+            "nginx.ingress.kubernetes.io/configuration-snippet" = "proxy_set_header X-Forwarded-Host $host; proxy_set_header X-Forwarded-Proto $scheme; proxy_set_header X-Forwarded-Uri $request_uri;"
         }
     }
 
 
     spec {
         ingress_class_name = "nginx"
+
+        tls {
+            hosts      = ["${var.dns_name}"]
+            secret_name = "tls-cert"
+        }
+
         rule {
-            host = "aqemia.admida0ui.de"
+            host = var.dns_name
 
             http {
                 path {

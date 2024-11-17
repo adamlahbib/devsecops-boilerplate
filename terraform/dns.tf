@@ -14,4 +14,11 @@ resource "cloudflare_record" "app" {
             content
         ]
     }
+
+    depends_on = [
+        data.kubernetes_service.nginx_ingress,
+        kubernetes_ingress_v1.dev-ingress,
+        kubernetes_ingress_v1.prod-ingress,
+        kubernetes_ingress_v1.monitoring-ingress
+    ]
 }

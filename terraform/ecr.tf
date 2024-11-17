@@ -18,5 +18,10 @@ module "ecr" {
             }
         ]
     })
+
+    lifecycle {
+        prevent_destroy = true
+    }
+    
     repository_image_tag_mutability = "MUTABLE"
 }

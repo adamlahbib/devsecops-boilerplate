@@ -38,14 +38,33 @@ resource "helm_release" "prometheus_operator" {
             }
             "grafana.ini" = {
                 server = {
-                    root_url = "https://aqemia.admida0ui.de/grafana/"
-                    domain = "aqemia.admida0ui.de"
-                    serve_from_sub_path = false
+                    root_url = "https://${var.dns_name}/grafana/"
+                    domain = var.dns_name
+                    serve_from_sub_path = true
                 }
             }
             adminPassword = var.GRAFANA_ADMIN_PASSWORD
         }
     })]
+
+    env = [
+        {
+            name = "GF_SERVER_ROOT_URL"
+            value = "https://${var.dns_name}/grafana/"
+        },
+        {
+            name = "GF_SERVER_SERVE_FROM_SUB_PATH"
+            value = "true"
+        },
+        {
+            name  = "GF_SECURITY_COOKIE_SAMESITE"
+            value = "none"
+        },
+        {
+            name  = "GF_SECURITY_COOKIE_SECURE"
+            value = "true"
+        }
+    ]
 
     set {
         name  = "prometheus.prometheusSpec.retention"
