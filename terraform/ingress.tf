@@ -44,7 +44,7 @@ resource "kubernetes_ingress_v1" "dev-ingress" {
         annotations = {
             "nginx.ingress.kubernetes.io/ssl-redirect"    = "false"
             "nginx.ingress.kubernetes.io/force-ssl-redirect" = "false"
-            "nginx.ingress.kubernetes.io/backend-protocol" = "HTTP"
+            "nginx.ingress.kubernetes.io/backend-protocol" = "HTTPS"
         }
     }
 
@@ -86,7 +86,7 @@ resource "kubernetes_ingress_v1" "prod-ingress" {
         annotations = {
             "nginx.ingress.kubernetes.io/ssl-redirect"    = "false"
             "nginx.ingress.kubernetes.io/force-ssl-redirect" = "false"
-            "nginx.ingress.kubernetes.io/backend-protocol" = "HTTP"
+            "nginx.ingress.kubernetes.io/backend-protocol" = "HTTPS"
         }
     }
     
