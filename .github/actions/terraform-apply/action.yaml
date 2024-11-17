@@ -32,6 +32,9 @@ inputs:
   CLOUDFLARE_EMAIL:
     description: 'Cloudflare Email'
     required: true
+  CLOUDFLARE_API_TOKEN:
+    description: 'Cloudflare API Token'
+    required: true
 
 runs:
   using: 'composite'
@@ -49,6 +52,7 @@ runs:
         TF_VAR_CLOUDFLARE_ZONE_ID: ${{ inputs.CLOUDFLARE_ZONE_ID }}
         TF_VAR_CLOUDFLARE_TOKEN: ${{ inputs.CLOUDFLARE_TOKEN }}
         TF_VAR_CLOUDFLARE_EMAIL: ${{ inputs.CLOUDFLARE_EMAIL }}
+        TF_VAR_CLOUDFLARE_API_TOKEN: ${{ inputs.CLOUDFLARE_API_TOKEN }}
       uses: dflook/terraform-apply@v1
       with:
         path: ./terraform

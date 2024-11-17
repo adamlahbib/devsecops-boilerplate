@@ -21,6 +21,7 @@ env:
   CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
   CLOUDFLARE_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN }}
   CLOUDFLARE_EMAIL: ${{ secrets.CLOUDFLARE_EMAIL }}
+  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
 jobs: 
   terraform-plan:
@@ -57,3 +58,4 @@ jobs:
           CLOUDFLARE_ZONE_ID: ${{ env.CLOUDFLARE_ZONE_ID }}
           CLOUDFLARE_TOKEN: ${{ env.CLOUDFLARE_TOKEN }}
           CLOUDFLARE_EMAIL: ${{ env.CLOUDFLARE_EMAIL }}
+          CLOUDFLARE_API_TOKEN: ${{ env.CLOUDFLARE_API_TOKEN }}

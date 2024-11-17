@@ -18,7 +18,7 @@ resource "kubernetes_secret" "cloudflare_api_token" {
         namespace = "cert-manager"
     }
     data = {
-        api-token = base64encode(var.CLOUDFLARE_TOKEN)
+        api-token = base64encode(var.CLOUDFLARE_API_TOKEN)
     }
 }
 
@@ -27,14 +27,14 @@ resource "kubectl_manifest" "cluster_issuer" {
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
-  name: letsencrypt-prod
-  namespace: cert-manager
+    name: letsencrypt-prod
+    namespace: cert-manager
 spec:
     acme:
         email: ${var.CLOUDFLARE_EMAIL}
         server: https://acme-v02.api.letsencrypt.org/directory
         privateKeySecretRef:
-        name: letsencrypt-prod-key
+            name: letsencrypt-prod
         solvers:
         - dns01:
             cloudflare:
