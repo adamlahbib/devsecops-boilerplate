@@ -38,8 +38,8 @@ resource "helm_release" "prometheus_operator" {
             }
             "grafana.ini" = {
                 server = {
-                    root_url = "https://${var.dns_name}/grafana/"
-                    domain = var.dns_name
+                    root_url = "https://${var.project_name}.${var.tailnet}/grafana/"
+                    domain = "${var.project_name}.${var.tailnet}"
                     serve_from_sub_path = true
                     cookie_samesite = "none"
                     cookie_secure = true

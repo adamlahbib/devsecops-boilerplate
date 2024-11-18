@@ -138,11 +138,11 @@ resource "kubernetes_ingress_v1" "monitoring-ingress" {
         ingress_class_name = "tailscale"
 
         tls {
-            hosts      = ["${var.project_name}.${var.tailnet}"]
+            hosts      = ["${var.project_name}"]
         }
 
         rule {
-            host = "${var.project_name}.${var.tailnet}"
+            host = var.project_name
 
             http {
                 path {
