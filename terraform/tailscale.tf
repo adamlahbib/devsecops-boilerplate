@@ -17,6 +17,6 @@ resource "helm_release" "tailscale_operator" {
 
     set {
         name = "operatorConfig.hostname"
-        value = var.project_name
+        value = "${var.project_name}-operator"
     }
 }

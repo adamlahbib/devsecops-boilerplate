@@ -22,6 +22,15 @@ resource "helm_release" "loki" {
     }
 }
 
+resource "helm_release" "tempo" {
+    name      = "tempo"
+    repository = "https://grafana.github.io/helm-charts"
+    chart     = "tempo"
+    namespace = "monitoring"
+    create_namespace = true
+    version   = "1.14.0"
+}
+
 resource "helm_release" "prometheus_operator" {
     name       = "prometheus-operator"
     repository = "https://prometheus-community.github.io/helm-charts"
@@ -38,14 +47,23 @@ resource "helm_release" "prometheus_operator" {
             }
             "grafana.ini" = {
                 server = {
-                    root_url = "https://${var.project_name}.${var.tailnet}/grafana/"
-                    domain = "${var.project_name}.${var.tailnet}"
+                    root_url = "https://grafana.${var.tailnet}/"
+                    domain = "grafana.${var.tailnet}"
                     serve_from_sub_path = true
                     cookie_samesite = "none"
                     cookie_secure = true
                 }
             }
             adminPassword = var.GRAFANA_ADMIN_PASSWORD
+            additionalDataSources = [
+                {
+                    name = "Prometheus"
+                    type = "prometheus"
+                    access = "proxy"
+                    url = "http://prometheus-operated:9090"
+                    isDefault = true
+                }
+            ]
         }
     })]
 
@@ -55,3 +73,16 @@ resource "helm_release" "prometheus_operator" {
     }
 }
 
+resource "kubernetes_config_map" "grafana_dashboards" {
+    metadata {
+        name     = "grafana-dashboards"
+        namespace = "monitoring"
+        labels = {
+            grafana_dashboard = "1"
+        }
+    }
+    data = {
+        "21419.json" = file("./assets/21419.json")
+    }
+    depends_on = [helm_release.prometheus_operator]
+}

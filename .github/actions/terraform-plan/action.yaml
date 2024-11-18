@@ -47,6 +47,9 @@ inputs:
   TAILSCALE_CLIENT_SECRET: 
     description: 'Tailscale Client Secret'
     required: true
+  CROWDSEC_ENROLL_KEY:
+    description: 'CrowdSec Enroll Key'
+    required: true
 
 runs:
   using: 'composite'
@@ -72,6 +75,7 @@ runs:
         TF_VAR_SLACK_WEBHOOK: ${{ inputs.SLACK_WEBHOOK }}
         TF_VAR_TAILSCALE_CLIENT_ID: ${{ inputs.TAILSCALE_CLIENT_ID }}
         TF_VAR_TAILSCALE_CLIENT_SECRET: ${{ inputs.TAILSCALE_CLIENT_SECRET }}
+        TF_VAR_CROWDSEC_ENROLL_KEY: ${{ inputs.CROWDSEC_ENROLL_KEY }}
       uses: dflook/terraform-plan@v1
       with:
         path: ./terraform

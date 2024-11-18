@@ -22,6 +22,7 @@ env:
   SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
   TAILSCALE_CLIENT_ID: ${{ secrets.TAILSCALE_CLIENT_ID }}
   TAILSCALE_CLIENT_SECRET: ${{ secrets.TAILSCALE_CLIENT_SECRET }}
+  CROWDSEC_ENROLL_KEY: ${{ secrets.CROWDSEC_ENROLL_KEY }}
 
 jobs: 
   terraform-apply:
@@ -63,6 +64,7 @@ jobs:
           SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
           TAILSCALE_CLIENT_ID: ${{ env.TAILSCALE_CLIENT_ID }}
           TAILSCALE_CLIENT_SECRET: ${{ env.TAILSCALE_CLIENT_SECRET }}
+          CROWDSEC_ENROLL_KEY: ${{ env.CROWDSEC_ENROLL_KEY }}
 
       - name: Prepare Slack Notification
         if: always()

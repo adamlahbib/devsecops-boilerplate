@@ -6,6 +6,7 @@ variable "CLOUDFLARE_API_TOKEN" { type= string }
 variable "SLACK_WEBHOOK" { type= string }
 variable "TAILSCALE_CLIENT_ID" { type= string }
 variable "TAILSCALE_CLIENT_SECRET" { type= string }
+variable "CROWDSEC_ENROLL_KEY" { type= string }
 
 variable "project_name" {
     description = "Name of the project"

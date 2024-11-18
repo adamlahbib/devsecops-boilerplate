@@ -16,12 +16,19 @@ resource "helm_release" "nginx-ingress-controller" {
         name  = "controller.defaultTLS.secret"
         value = "default/tls-cert"
     }
+
+    values = [
+        file("./assets/crowdsec-ingress-nginx.yaml")
+    ]
+
+    depends_on = [helm_release.crowdsec]
+
 }
 
 data "kubernetes_service" "nginx_ingress" {
     metadata {
-    name      = "nginx-ingress-controller"
-    namespace = "default"
+        name      = "nginx-ingress-controller"
+        namespace = "default"
     }
 }
 
@@ -121,38 +128,25 @@ resource "kubernetes_ingress_v1" "prod-ingress" {
     depends_on = [helm_release.nginx-ingress-controller, kubernetes_namespace.prod]
 }
 
-resource "kubernetes_ingress_v1" "monitoring-ingress" {
+resource "kubernetes_ingress_v1" "falco-ingress" {
     metadata {
-        name      = "monitoring-ingress"
-        namespace = "monitoring"
+        name      = "falco-ingress"
+        namespace = "falco"
     }
-
 
     spec {
         ingress_class_name = "tailscale"
 
         tls {
-            hosts      = ["${var.project_name}"]
+            hosts      = ["falco"]
         }
 
         rule {
-            host = var.project_name
+            host = "falco"
 
             http {
                 path {
-                    path = "/grafana/"
-                    path_type = "Prefix"
-                    backend{
-                        service {
-                            name = "prometheus-operator-grafana"
-                            port {
-                                number = 80
-                            }
-                        }
-                    }
-                }
-                path {
-                    path = "/falco/"
+                    path = "/"
                     path_type = "Prefix"
                     backend{
                         service {
@@ -166,5 +160,41 @@ resource "kubernetes_ingress_v1" "monitoring-ingress" {
             }
         }
     }
-    depends_on = [helm_release.tailscale_operator, helm_release.prometheus_operator, helm_release.falco]
+    depends_on = [helm_release.tailscale_operator, helm_release.falco]
+}
+
+resource "kubernetes_ingress_v1" "monitoring-ingress" {
+    metadata {
+        name      = "monitoring-ingress"
+        namespace = "monitoring"
+    }
+
+
+    spec {
+        ingress_class_name = "tailscale"
+
+        tls {
+            hosts      = ["grafana"]
+        }
+
+        rule {
+            host = "grafana"
+
+            http {
+                path {
+                    path = "/"
+                    path_type = "Prefix"
+                    backend{
+                        service {
+                            name = "prometheus-operator-grafana"
+                            port {
+                                number = 80
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    depends_on = [helm_release.tailscale_operator, helm_release.prometheus_operator]
 }
