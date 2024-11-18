@@ -125,9 +125,6 @@ resource "kubernetes_ingress_v1" "monitoring-ingress" {
     metadata {
         name      = "monitoring-ingress"
         namespace = "monitoring"
-        annotations = {
-            "tailscale.com/tags" = "tag:aqemia-monitoring"
-        }
     }
 
 
