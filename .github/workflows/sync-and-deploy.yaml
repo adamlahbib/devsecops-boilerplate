@@ -1,0 +1,152 @@
+name: Sync Infra and Deploy to EKS
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_REGION: ${{ secrets.AWS_BASE_REGION }}
+  TFSTATE_BUCKET: ${{ secrets.TFSTATE_BUCKET }}
+  TFSTATE_KEY: ${{ secrets.TFSTATE_KEY }}
+  GRAFANA_ADMIN_PASSWORD: ${{ secrets.GRAFANA_ADMIN_PASSWORD }}
+  ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+  EKS_CLUSTER_NAME: ${{ secrets.EKS_CLUSTER_NAME }}
+  CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+  CLOUDFLARE_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN }}
+  CLOUDFLARE_EMAIL: ${{ secrets.CLOUDFLARE_EMAIL }}
+  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+  SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+  TAILSCALE_CLIENT_ID: ${{ secrets.TAILSCALE_CLIENT_ID }}
+  TAILSCALE_CLIENT_SECRET: ${{ secrets.TAILSCALE_CLIENT_SECRET }}
+  CROWDSEC_ENROLL_KEY: ${{ secrets.CROWDSEC_ENROLL_KEY }}
+
+jobs: 
+  terraform-apply:
+    name: Sync Terraform
+    runs-on: ubuntu-latest
+    outputs:
+      message: ${{ steps.prepare-slack.outputs.status }}
+    defaults:
+      run:
+        working-directory: ./terraform
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Terraform Apply
+        id: terraform-apply
+        uses: ./.github/actions/terraform-apply
+        with:
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+          tfstate-bucket: ${{ env.TFSTATE_BUCKET }}
+          tfstate-key: ${{ env.TFSTATE_KEY }}
+          stage: "prod" # the idea is we can have another terraform env for dev, but due to my AWS financial constraints, I just relied on different Kubernetes namespaces.
+          GRAFANA_ADMIN_PASSWORD: ${{ env.GRAFANA_ADMIN_PASSWORD }}
+          CLOUDFLARE_ZONE_ID: ${{ env.CLOUDFLARE_ZONE_ID }}
+          CLOUDFLARE_TOKEN: ${{ env.CLOUDFLARE_TOKEN }}
+          CLOUDFLARE_EMAIL: ${{ env.CLOUDFLARE_EMAIL }}
+          CLOUDFLARE_API_TOKEN: ${{ env.CLOUDFLARE_API_TOKEN }}
+          SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
+          TAILSCALE_CLIENT_ID: ${{ env.TAILSCALE_CLIENT_ID }}
+          TAILSCALE_CLIENT_SECRET: ${{ env.TAILSCALE_CLIENT_SECRET }}
+          CROWDSEC_ENROLL_KEY: ${{ env.CROWDSEC_ENROLL_KEY }}
+
+      - name: Prepare Slack Notification
+        if: always()
+        id: prepare-slack
+        run: |
+          if [ "${{ steps.terraform-apply.outcome }}" == "success" ]; then
+            echo "status=Deployment successful!" >> $GITHUB_OUTPUT
+          else
+            echo "status=Deployment failed!" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+  deploy:
+    needs: terraform-apply
+    name: Deploy API
+    runs-on: ubuntu-latest
+    outputs:
+      message: ${{ steps.verify-deployment.outputs.status }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for Changes
+        id: find_changes
+        run: |
+          if [ -z "$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- app)" ]; then
+            echo "deploy=false" >> $GITHUB_ENV
+          else
+            echo "deploy=true" >> $GITHUB_ENV
+          fi
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-push-image
+        uses: ./.github/actions/build-push-image
+        with:
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+          ecr-repository: ${{ env.ECR_REPOSITORY }}
+          dockerfile: ./Dockerfile
+          stage: "prod"
+          buildable: ${{ env.deploy }}
+
+      - name: Update Kubeconfig
+        run: |
+          if [ "${{ env.deploy }}" != "false" ]; then
+            aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
+          fi
+
+      - name: Deploy to EKS
+        working-directory: ./k8s
+        env:
+          IMAGE: ${{ steps.build-push-image.outputs.image }}
+          STAGE: "prod"
+        run: |
+          if [ "${{ env.deploy }}" != "false" ]; then
+            sed -i "s|{{IMAGE}}|${IMAGE}|g" ${STAGE}/deployment.yaml
+            kubectl apply -f ${STAGE}
+          fi
+
+      - name: Verify Deployment
+        id: verify-deployment
+        env:
+          STAGE: "prod"
+        shell: bash
+        run: |
+          if [ "${{ env.deploy }}" != "false" ]; then
+            kubectl rollout status deployment/app -n ${STAGE} --timeout=5m
+            if [ $? -eq 0 ]; then
+              echo "status=Deployment successful!" >> $GITHUB_OUTPUT
+            else
+              echo "status=Deployment failed!" >> $GITHUB_OUTPUT
+              exit 1
+            fi
+          else
+            echo "status=No changes to deploy" >> $GITHUB_OUTPUT
+          fi
+
+  notify-slack:
+    needs:
+      - deploy
+      - terraform-apply
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_CHANNEL: "#deployments"
+          SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
+          SLACK_USERNAME: "Deployer on Cloudflare"
+          SLACK_MESSAGE: ${{ needs.deploy.outputs.message && needs.deploy.outputs.message || needs.terraform-apply.outputs.message }}
+          SLACK_COLOR: ${{ contains(needs.deploy.outputs.message, 'successful') && 'good' || 'danger' }}
+          SLACK_ICON: "https://avatars.githubusercontent.com/u/44036562?s=200&v=4"

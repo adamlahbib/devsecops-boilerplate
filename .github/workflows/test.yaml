@@ -1,0 +1,94 @@
+# The pipeline can have failed steps marked as successful by using continue-on-error: true. 
+# If needed, I just went with the default setting for the sake of simplicity and used the always() condition to ensure that any step runs regardless of the outcome of the previous steps.
+
+name: Test Pipeline
+
+on:
+  pull_request:
+    branches:
+      - main
+      - dev
+
+jobs: 
+  test-app:
+    runs-on: ubuntu-latest
+    name: Test Application
+    outputs:
+      message: "Bandit Security Linting: ${{ steps.bandit.outcome }}\nTrufflehog Leaked Secret Scanning: ${{ steps.trufflehog.outcome }}\nGrype Container Vulnerability Scanning: ${{ steps.grype.outcome }}\nApplication Tests: ${{ steps.tests.outcome }}\nFlake8 Linting: ${{ steps.lint.outcome }}"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.head_ref }}
+
+      - name: Bandit Security Linting
+        id: bandit
+        if: always()
+        uses: tj-actions/bandit@v5.1
+        with:
+          options: "-l" # Include only high severity issues
+
+      - name: Trufflehog Leaked Secret Scanning
+        id: trufflehog
+        if: always()
+        uses: edplato/trufflehog-actions-scan@master
+
+      - name: Set up Docker Buildx
+        if: always()
+        uses: docker/setup-buildx-action@v3
+        with: 
+          version: latest
+
+      - name: Build Local Image
+        if: always()
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          tags: localhost/app:latest
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Grype Container Vulnerability Scanning
+        id: grype
+        if: always()
+        uses: anchore/scan-action@v3
+        with:
+          image: "localhost/app:latest"
+          fail-build: true
+          severity-cutoff: "critical"
+      
+      - name: Compose-Up
+        if: always()
+        run: make run
+      
+      - name: Flake8 Linting # I had linting running inside the container as the application uses uvicorn, a server that won't exit if any errors are found and thus the container would not stop running
+        id: lint
+        if: always()
+        run: make lint
+
+      - name: Run-Tests
+        id: tests
+        if: always()
+        run: make test
+
+      - name: Compose-Down
+        if: always()
+        run: make clean
+
+  notify-slack:
+    needs: test-app
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_CHANNEL: "#qa"
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_USERNAME: "Test Pipeline Results"
+          SLACK_MESSAGE: ${{ needs.test-app.outputs.message }}
+          SLACK_COLOR: ${{ contains(needs.test-app.outputs.message, 'failed') && 'danger' || 'good' }}
+          SLACK_ICON: "https://avatars.githubusercontent.com/u/44036562?s=200&v=4"
