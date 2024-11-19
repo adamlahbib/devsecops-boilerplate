@@ -1,0 +1,22 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: restrict-contrainer-registries
+spec:
+  validationFailureAction: enforce
+  background: true # Check existing resources
+  rules:
+    - name: restrict-contrainer-registries
+      match:
+        resources:
+          kinds:
+            - Pod
+          namespaces:
+            - dev
+            - prod
+      validate:
+        message: "The container image must come from the approved ECR registry."
+        pattern:
+          spec:
+            containers:
+              - image: "*.dkr.ecr.eu-west-3.amazonaws.com/aqemia-adaml-repo:*"

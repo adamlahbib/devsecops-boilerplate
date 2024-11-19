@@ -1,0 +1,21 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: disallow-nodeport-service
+spec:
+  validationFailureAction: enforce
+  background: true # Check existing resources
+  rules:
+    - name: disallow-nodeport-service
+      match:
+        resources:
+          kinds:
+            - Service
+          namespaces:
+            - dev
+            - prod
+      validate:
+        message: "The Service type 'NodePort' is not allowed."
+        pattern:
+          spec:
+            type: "!NodePort"

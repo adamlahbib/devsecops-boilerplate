@@ -417,6 +417,21 @@ The Alertmanager handles alerts sent by client applications such as the Promethe
 
 Tempo is an easy-to-operate, high-scale, and cost-effective distributed tracing system. Tempo can be used to oversee the performance of microservices and distributed systems, providing insights into latency, errors, and performance bottlenecks.
 
+# KYVERNO
+
+Kyverno is a policy engine designed for Kubernetes. It allows cluster administrators to enforce policies on resources in a Kubernetes cluster. Kyverno policies are written in YAML and can be used to enforce security, compliance, and operational best practices.
+
+The following policies are enforced:
+
+- Disallow privileged containers: Ensures that no privileged containers are deployed in the cluster.
+- Disallow NodePort services: Ensures that no NodePort services are deployed in the cluster.
+- Disallow Latest Tag: Ensures that no images are deployed with the latest tag.
+- Disallow Default Namespace: Ensures that no resources are deployed in the default namespace.
+- Allowed Replicas: Ensures that the number of replicas for a deployment is within a specified range.
+- Allowed Container Registry: Ensures that the container registry used in the deployment is allowed.
+- Require Resource Requests and Limits: Ensures that resource requests and limits are set for containers in a deployment.
+- Require Pod Probe: Ensures that liveness and readiness probes are set for containers in a deployment.
+
 # VPN RESTRICTED ACCESS
 
 In my experience, I have seen that this is a must, having administrative endpoints and dashboards exposed to the internet is always a risk. Therefore, I used Tailscale to restrict access to the monitoring resources and security reports to the Tailscale tailnet users only whether they are administrators or a small team of operators.
