@@ -169,7 +169,8 @@ resource "kubernetes_config_map" "grafana_dashboards" {
         }
     }
     data = {
-        "21419.json" = file("./assets/21419.json")
+        "21419.json" = file("./assets/21419.json"),
+        "crowdsec_v5.json" = file("./assets/crowdsec_v5.json")
     }
     depends_on = [aws_eks_cluster.eks_cluster, helm_release.prometheus_operator]
 }
