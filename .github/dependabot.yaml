@@ -4,8 +4,8 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-      day: "monday"
-      time: "08:00"
+      day: "wednesday"
+      time: "23:30"
     open-pull-requests-limit: 5
     ignore:
       - dependency-name: "fastapi"

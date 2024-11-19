@@ -4,8 +4,7 @@
 
 For the following, a subdomain from my personal blog was used, which you can visit at https://admida0ui.de 🙂
 
-- Production URL: https://aqemia.admida0ui.de
-- Development URL: https://aqemia.admida0ui.de/dev
+- Production URL: https://aqemia.admida0ui.de/docs
 
 - Slack for Alerts and Notifications (invited): https://adaml-test.slack.com/ 
 
@@ -213,6 +212,8 @@ The plan infrastructure job uses `dflook` images to run the Terraform plan comma
 
 ## TEST AND CODE SCANNING JOBS
 
+REFER TO THIS [JOB LOGS](https://github.com/adamlahbib/aqemia/actions/runs/11922712020/job/33229562109?pr=11)
+
 ### FLAKE8, PYTEST, AND PYCOV
 
 Flake8 is a Python linting tool that checks the code for PEP8 compliance and other coding standards. The job is triggered on pull requests and runs the Flake8 tool on the container directly to check the code.
@@ -271,6 +272,8 @@ The Sync Terraform job: `terraform-apply` in the [sync-and-deploy.yaml file](../
 
 ![](2024-11-19-23-02-06.png)
 
+REFER TO THIS [JOB LOGS](https://github.com/adamlahbib/aqemia/actions/runs/11922627881/job/33229299694)
+
 ### APPLICATION DEPLOYMENT JOB
 
 This Deploy API job: `deploy` in the [sync-and-deploy.yaml file](../.github/workflows/sync-and-deploy.yaml), automates the deployment of an API application after applying Terraform infrastructure changes. It proceeds through these key steps:
@@ -281,6 +284,8 @@ This Deploy API job: `deploy` in the [sync-and-deploy.yaml file](../.github/work
 - Update Kubeconfig: Configures kubectl to interact with the correct EKS cluster, conditioned on deployment necessity.
 - Deploy to EKS: Applies Kubernetes manifests, dynamically replacing the image placeholder in the deployment.yaml file for the current stage.
 - Verify Deployment: Ensures the deployment succeeds by monitoring its rollout status and reporting success or failure.
+
+PROD: REFER TO THIS [JOB LOGS](https://github.com/adamlahbib/aqemia/actions/runs/11922627881/job/33229354469)
 
 #### APPLICATION KUBERNETES MANIFESTS
 
@@ -479,7 +484,11 @@ The NGINX ingress controller is extended with the CrowdSec Lua bouncer plugin, d
 
 ### CROWDSEC GRAFANA DASHBOARDS
 
+![](2024-11-19-23-16-06.png)
 
+![](2024-11-19-23-16-28.png)
+
+PS. a fresh CrowdSec installation and no attacks were detected during the time of writing this documentation :/
 
 # WRAPPING UP
 
