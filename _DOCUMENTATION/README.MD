@@ -269,6 +269,8 @@ The pushed image to the ECR is tagged with the latest commit SHA along with the 
 
 The Sync Terraform job: `terraform-apply` in the [sync-and-deploy.yaml file](../.github/workflows/sync-and-deploy.yaml), automates the deployment of infrastructure with Terraform in a streamlined and secure manner. It includes three main steps: Checkout, which fetches the code repository for execution; Terraform Apply, which uses a custom GitHub Action to apply the Terraform configuration with environment-specific variables like AWS credentials, Cloudflare API tokens, and Kubernetes settings; and Prepare Slack Notification, which ensures a clear status update is sent to a Slack channel, regardless of deployment success or failure. 
 
+![](2024-11-19-23-02-06.png)
+
 ### APPLICATION DEPLOYMENT JOB
 
 This Deploy API job: `deploy` in the [sync-and-deploy.yaml file](../.github/workflows/sync-and-deploy.yaml), automates the deployment of an API application after applying Terraform infrastructure changes. It proceeds through these key steps:
