@@ -1,0 +1,21 @@
+additionalPrometheusRulesMap:
+  alerts-config:
+    groups:
+    - name: resource-alerts
+      rules:
+      - alert: HighRequestRate
+        expr: rate(http_requests_total{job="web_server"}[5m]) > 100
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: High request rate on web server
+          description: '{{ $labels.instance }} has high request rate (>100 req/min) for the last 5 minutes.'
+      - alert: HighCPULoad
+        expr: node_load1 > 0.8
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: High CPU load detected
+          description: '{{ $labels.instance }} has CPU load >0.8 for the last 5 minutes.'
