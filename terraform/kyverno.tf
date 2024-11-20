@@ -6,6 +6,27 @@ resource "helm_release" "kyverno" {
     create_namespace = true
     version = "3.3.3"
 
+    set {
+        name  = "admissionController.container.extraArgs"
+        value = "--autoUpdateWebhooks=false"
+    }
+
+    values = [
+      config.webhooks = [
+        {
+          namespaceSelector = {
+            matchExpressions = [
+              {
+                key = "kubernetes.io/metadata.name"
+                operator = "NotIn"
+                values = ["kyverno, kube-system, monitoring, crowdsec, falco, tailscale, nginx-ingress"]
+              }
+            ]
+          }
+        }
+      ]
+    ]
+
     depends_on = [
       helm_release.nginx-ingress-controller,
       helm_release.crowdsec,
