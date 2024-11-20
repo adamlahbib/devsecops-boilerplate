@@ -4,7 +4,7 @@ resource "helm_release" "kyverno" {
     chart = "kyverno"
     namespace = "kyverno"
     create_namespace = true
-    version = "3.3.3"
+    version = "3.1.5"
 
     values = [
         file("./assets/kyverno-values.yaml")
