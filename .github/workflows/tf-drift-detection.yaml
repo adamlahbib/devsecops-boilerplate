@@ -6,7 +6,6 @@ on:
     - cron: '0 3 * * *'
 
 permissions:
-  id-token: write
   contents: read
   issues: write
 
@@ -111,7 +110,7 @@ jobs:
         env:
           SUMMARY: "${{ steps.tf-plan-string.outputs.summary }}"
         with:
-            github-token: ${{ secrets.GITHUB_TOKEN }}
+            github-token: ${{ secrets.GIT_TOKEN }}
             script: |
               const body = `${process.env.SUMMARY}`;
               const title = 'Terraform Configuration Drift Detected';
@@ -156,7 +155,7 @@ jobs:
         if: steps.tf-plan.outputs.exitcode == 0
         uses: actions/github-script@v7
         with:
-            github-token: ${{ secrets.GITHUB_TOKEN }}
+            github-token: ${{ secrets.GIT_TOKEN }}
             script: |
               const title = 'Terraform Configuration Drift Detected';
               const creator = 'github-actions[bot]'
