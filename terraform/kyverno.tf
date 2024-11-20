@@ -27,6 +27,9 @@ spec:
           namespaces:
             - dev
             - prod
+          selector:
+              matchLabels:
+                app: my-app
       validate:
         message: "The container image must come from the approved ECR registry."
         pattern:
@@ -55,6 +58,9 @@ spec:
           namespaces:
             - dev
             - prod
+          selector:
+              matchLabels:
+                app: my-app
       validate:
         message: "The container must image must have a tag other than latest"
         pattern:
@@ -84,6 +90,9 @@ spec:
           namespaces:
             - dev
             - prod
+          selector:
+              matchLabels:
+                app: my-app
       validate:
         message: "The Service type 'NodePort' is not allowed."
         pattern:
@@ -109,10 +118,12 @@ spec:
             - Deployment
             - StatefulSet
             - ReplicaSet
-      namespaceSelector:
-        matchNames:
-          - prod
-          - dev
+          namespaces:
+            - prod
+            - dev
+          selector:
+              matchLabels:
+                app: my-app
       validate:
         message: "The number of replicas must not exceed 6."
         pattern:
@@ -162,10 +173,12 @@ spec:
             - Deployment
             - StatefulSet
             - ReplicaSet
-      namespaceSelector:
-        matchNames:
-          - prod
-          - dev
+          namespaces:
+            - prod
+            - dev
+          selector:
+              matchLabels:
+                app: my-app
       validate:
         message: "Privileged containers are not allowed in the 'prod' and 'dev' namespaces."
         pattern:
@@ -194,17 +207,21 @@ spec:
             - Deployment
             - StatefulSet
             - ReplicaSet
-      namespaceSelector:
-        matchNames:
-          - prod
-          - dev
+          namespaces:
+            - prod
+            - dev
+          selector:
+              matchLabels:
+                app: my-app
       validate:
         message: "Liveness and readiness probes must be set for containers."
         pattern:
           spec:
             containers:
               - readinessProbe: "?*"
-YAML
+YAML          namespaces:
+            - prod
+            - dev
     depends_on = [helm_release.kyverno]
 }
 
@@ -225,10 +242,12 @@ spec:
             - Deployment
             - StatefulSet
             - ReplicaSet
-      namespaceSelector:
-        matchNames:
-          - prod
-          - dev
+          namespaces:
+            - prod
+            - dev
+          selector:
+              matchLabels:
+                app: my-app
       validate:
         message: "Resource limits must be set for CPU and memory in the 'prod' and 'dev' namespaces."
         pattern:

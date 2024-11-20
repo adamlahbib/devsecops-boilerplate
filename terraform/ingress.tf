@@ -2,6 +2,8 @@ resource "helm_release" "nginx-ingress-controller" {
     name       = "nginx-ingress-controller"
     repository = "https://charts.bitnami.com/bitnami"
     chart      = "nginx-ingress-controller"
+    namespace  = "nginx-ingress"
+    create_namespace = true
 
     set {
         name  = "service.type"
@@ -28,7 +30,7 @@ resource "helm_release" "nginx-ingress-controller" {
 data "kubernetes_service" "nginx_ingress" {
     metadata {
         name      = "nginx-ingress-controller"
-        namespace = "default"
+        namespace = "nginx-ingress"
     }
     depends_on = [helm_release.nginx-ingress-controller]
 }
