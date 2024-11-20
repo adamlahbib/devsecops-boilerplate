@@ -5,6 +5,11 @@ on:
   schedule:
     - cron: '0 3 * * *'
 
+permissions:
+  id-token: write
+  contents: read
+  issues: write
+
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -24,53 +29,158 @@ env:
   CROWDSEC_ENROLL_KEY: ${{ secrets.CROWDSEC_ENROLL_KEY }}
 
 jobs:
-  drift-detection:
-    name: Check Drift
-
-    permissions:
-      id-token: write
-      contents: read
-      pull-requests: read
-      checks: read
-
+  terraform-plan:
+    name: Terraform Plan
     runs-on: ubuntu-latest
-
+    outputs:
+      TFPLAN_EXIT_CODE: ${{ steps.tfplan.outputs.exitcode }}
+    
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref }}
-          fetch-depth: 0
-
-      - name: Install Terramate
-        uses: terramate-io/terramate-action@v1
-
-      - name: Install Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.9.8
-          terraform_wrapper: false
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with: 
-          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+          aws-access-key-id: ${{ inputs.aws-access-key-id }}
+          aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
+          aws-region: ${{ inputs.aws-region }}
 
-      - name: Run Terraform init on all stacks
-        id: init
-        run: terramate run -- terraform init
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+        
+      - name: Terraform Init
+        run: terraform init
 
-      - name: Run drift detection
-        id: drift
-        run: |
-          terramate run \
-          --sync-drift-status \
-          --terraform-plan-file=drift.tfplan \
-          --continue-on-error \
-          --parallel 5 \
-          -- \
-          terraform plan -out drift.tfplan -detailed-exitcode -lock=false
+      - name: Terraform Plan
+        id: tfplan
         env:
-          GITHUB_TOKEN: ${{ github.token }}
+          TF_VAR_GRAFANA_ADMIN_PASSWORD: ${{ inputs.GRAFANA_ADMIN_PASSWORD }}
+          TF_VAR_CLOUDFLARE_ZONE_ID: ${{ inputs.CLOUDFLARE_ZONE_ID }}
+          TF_VAR_CLOUDFLARE_TOKEN: ${{ inputs.CLOUDFLARE_TOKEN }}
+          TF_VAR_CLOUDFLARE_EMAIL: ${{ inputs.CLOUDFLARE_EMAIL }}
+          TF_VAR_CLOUDFLARE_API_TOKEN: ${{ inputs.CLOUDFLARE_API_TOKEN }}
+          TF_VAR_SLACK_WEBHOOK: ${{ inputs.SLACK_WEBHOOK }}
+          TF_VAR_TAILSCALE_CLIENT_ID: ${{ inputs.TAILSCALE_CLIENT_ID }}
+          TF_VAR_TAILSCALE_CLIENT_SECRET: ${{ inputs.TAILSCALE_CLIENT_SECRET }}
+          TF_VAR_CROWDSEC_ENROLL_KEY: ${{ inputs.CROWDSEC_ENROLL_KEY }}
+        run: |
+          export exitcode=0
+          terraform plan -detailed-exitcode -no-color -out tfplan || exitcode=$?
+          echo "exitcode=$exitcode" >> $GITHUB_ENV
+          if [ $exitcode -eq 1 ]; then
+            echo Terraform Plan Failed!
+            exit 1
+          else
+            exit 0
+          fi
+
+      - name: Upload Terraform Plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan
+          path: tfplan
+
+      - name: Create String Output
+        id: tf-plan-string
+        run: |
+          TERRAFORM_PLAN=$(terraform show -no-color tfplan)
+        
+          delimiter="$(openssl rand -hex 8)"
+          echo "summary<<${delimiter}" >> $GITHUB_OUTPUT
+          echo "## Terraform Plan Output" >> $GITHUB_OUTPUT
+          echo "<details><summary>Click to expand</summary>" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo '```terraform' >> $GITHUB_OUTPUT
+          echo "$TERRAFORM_PLAN" >> $GITHUB_OUTPUT
+          echo '```' >> $GITHUB_OUTPUT
+          echo "</details>" >> $GITHUB_OUTPUT
+          echo "${delimiter}" >> $GITHUB_OUTPUT
+
+      - name: Publish Terraform Plan to Task Summary
+        env:
+          SUMMARY: ${{ steps.tf-plan-string.outputs.summary }}
+        run: |
+          echo "$SUMMARY" >> $GITHUB_STEP_SUMMARY
+    
+      - name: Publish Drift Report
+        if: steps.tf-plan.outputs.exitcode == 2
+        uses: actions/github-script@v7
+        env:
+          SUMMARY: "${{ steps.tf-plan-string.outputs.summary }}"
+        with:
+            github-token: ${{ secrets.GITHUB_TOKEN }}
+            script: |
+              const body = `${process.env.SUMMARY}`;
+              const title = 'Terraform Configuration Drift Detected';
+              const creator = 'github-actions[bot]'
+            
+              // Look to see if there is an existing drift issue
+              const issues = await github.rest.issues.listForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: 'open',
+                creator: creator,
+                title: title
+              })
+                
+              if( issues.data.length > 0 ) {
+                // We assume there shouldn't be more than 1 open issue, since we update any issue we find
+                const issue = issues.data[0]
+                
+                if ( issue.body == body ) {
+                  console.log('Drift Detected: Found matching issue with duplicate content')
+                } else {
+                  console.log('Drift Detected: Found matching issue, updating body')
+                  github.rest.issues.update({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: issue.number,
+                    body: body
+                  })
+                }
+              } else {
+                console.log('Drift Detected: Creating new issue')
+
+                github.rest.issues.create({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  title: title,
+                  body: body
+              })
+              }
+
+      - name: Publish Drift Report
+        if: steps.tf-plan.outputs.exitcode == 0
+        uses: actions/github-script@v7
+        with:
+            github-token: ${{ secrets.GITHUB_TOKEN }}
+            script: |
+              const title = 'Terraform Configuration Drift Detected';
+              const creator = 'github-actions[bot]'
+            
+              // Look to see if there is an existing drift issue
+              const issues = await github.rest.issues.listForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: 'open',
+                creator: creator,
+                title: title
+              })
+                
+              if( issues.data.length > 0 ) {
+                const issue = issues.data[0]
+                
+                github.rest.issues.update({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  state: 'closed'
+                })
+              } 
+
+      - name: Error on Failure
+        if: steps.tf-plan.outputs.exitcode == 2
+        run: exit 1

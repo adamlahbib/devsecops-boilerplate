@@ -241,11 +241,9 @@ Bandit is a tool designed to find common security issues in Python code. To do t
 
 Checkov is a static code analysis tool for infrastructure-as-code. It scans Terraform, CloudFormation, Kubernetes, and other IaC files for security and compliance issues. Checkov is used to ensure that the Terraform code is secure and compliant with best practices.
 
-### TERRAFORM DRIFT DETECTION WITH TERRAMATE
+### TERRAFORM DRIFT DETECTION
 
-Terramate helps you to detect drift by periodically running drift detection workflows in your CI/CD such as GitHub Actions, GitLab CI/CD or BitBucket pipelines. Upon detection of drift in stacks, Terramate will sync those drift to Terramate Cloud allowing you to identify and manage drift
-
-Terramate can create actionable alerts for drifted stacks that notify an owner or a group of owners of stacks. In addition, notifications can be sent to a centralized Slack channel or directly to Slack users by using our Slack app.
+I first wanted to use Terramate for this but their process involved using a client locally on my laptop and more, so I went with this one https://github.com/azure-samples/terraform-github-actions/blob/main/.github/workflows/tf-drift.yml that was a great inspiration to understand the process from and implement it myself.
 
 ### TRUFFLEHOG
 
