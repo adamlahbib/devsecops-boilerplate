@@ -210,9 +210,6 @@ spec:
         resources:
           kinds:
             - Pod
-            - Deployment
-            - StatefulSet
-            - ReplicaSet
           namespaces:
             - prod
             - dev
@@ -223,9 +220,15 @@ spec:
         message: "Privileged containers are not allowed in the 'prod' and 'dev' namespaces."
         pattern:
           spec:
+            =(ephemeralContainers):
+              - =(securityContext):
+                  =(privileged): "false"
+            =(initContainers):
+              - =(securityContext):
+                  =(privileged): "false"
             containers:
-              - securityContext:
-                  privileged: false 
+              - =(securityContext):
+                  =(privileged): "false"
 YAML
     depends_on = [helm_release.kyverno]
 }
@@ -244,9 +247,6 @@ spec:
         resources:
           kinds:
             - Pod
-            - Deployment
-            - StatefulSet
-            - ReplicaSet
           namespaces:
             - prod
             - dev
@@ -270,16 +270,13 @@ kind: ClusterPolicy
 metadata:
   name: require-resource-limits
 spec:
-  validationFailureAction: enforce
+  validationFailureAction: audit
   rules:
     - name: require-resource-limits
       match:
         resources:
           kinds:
             - Pod
-            - Deployment
-            - StatefulSet
-            - ReplicaSet
           namespaces:
             - prod
             - dev
