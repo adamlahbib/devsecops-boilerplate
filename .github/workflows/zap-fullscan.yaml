@@ -1,0 +1,21 @@
+name: Nightly DAST Scans 
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 3 * * *'
+
+jobs:
+  owasp-zap-full-scan:
+    runs-on: ubuntu-latest
+    steps:
+      
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Run OWASP Zap Full Scan 
+        uses: zaproxy/action-full-scan@v0.11.0
+        with:
+          token: ${{ secrets.GIT_TOKEN }}
+          target: "https://aqemia.admida0ui.de/dev/docs/"
+          issue_title: "Nightly DAST Full Scan by OWASP ZAP - ${{ github.run_number }}"

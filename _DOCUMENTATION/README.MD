@@ -1,5 +1,9 @@
 # TASK WRITEUP
 
+You need to create a **repository implementing** the **best OPS practices** (fork this repository).
+You have 4 hours, or more if you choose to take additional time.
+The goal is to **automate the deployment** of an **API** on an **IPv4 Kubernetes cluster** in a scalable, observable, secure, and reproducible manner.
+
 # TASK AND LINKS FOR CHECKING ONCE DEPLOYED
 
 For the following, a subdomain from my personal blog was used, which you can visit at https://admida0ui.de 🙂
@@ -59,6 +63,8 @@ Access to my laptop and GitHub commits are secured with a Nitrokey FIDO2 securit
 
 GitHub is where my fork of the repository is located privately and where the CI/CD pipeline is running.
 
+I would invite you as mainterns to the repository to check the code and the pipeline, but for testability, I'd give developer roles since some the pipelines are done in an efficient and optimised way to only trigger on certain file changes and more...
+
 ### MONOREPO STRUCTURE
 
 The repository is structured as a monorepo with the following directories:
@@ -116,6 +122,8 @@ The IAM roles created are:
 
 - EKS Cluster Role: Allows EKS to manage AWS resources on your behalf. The `AmazonEKSClusterPolicy` provides ELS the necessary permissions to create and manage cluster resources.
 - Worker Node Role: Allows worker nodes in the EKS Node Group to communicate with the EKS control plane. The `AmazonEKSWorkerNodePolicy` provides the necessary permissions to register with the EKS cluster, the `AmazonEC2ContainerRegistryReadOnly` policy allows the worker nodes to pull images from the ECR repository, the `AmazonEKS_CNI_Policy` grants permissions for networking tasks within the cluster.
+
+Besides, I will create access-only roles for you 😉
 
 #### THE WORKER NODE LAUNCH TEMPLATE
 
@@ -267,11 +275,31 @@ Grype is a vulnerability scanner for container images and filesystems developed 
 
 ![](2024-11-20-01-25-23.png)
 
-### DEPANDABOT FOR DEPENDENCY UPDATES JOB
+### DEPENDABOT FOR DEPENDENCY CHECKS AND UPDATES JOB
 
 Dependabot is enabled to check for dependency updates and create pull requests for them. The job is triggered on a schedule and checks for updates to the dependencies in the `requirements.txt` file.
 
 ![](2024-11-19-01-17-11.png)
+
+### OWASP ZAP FOR DYNAMIC SECURITY SCANNING
+
+The Zed Attack Proxy (ZAP) by Checkmarx is the world’s most widely used web app scanner. Free and open source. A community based GitHub Top 1000 project that anyone can contribute to.
+
+It can help you automatically find security vulnerabilities in your web applications while you are developing and testing your applications.
+
+#### OWASP ZAP BASELINE SCAN
+
+This job penetrates the application with the quicker and less intrusive scan to identify the most common vulnerabilities. The scan is triggered after a Kubernetes deployment in both the dev and prod environments.
+
+#### OWASP ZAP FULL SCAN
+
+This job runs over night featuring the full thorough scan to identify all the vulnerabilities in the application. The scan checks the main endpoint for the application.
+
+After each scan, Zap would raise findings in the repo issues and would manage them thereafter: If you close an unfixed issue, Zap will reopen it after the next run, and similarly, will automatically close an issue if it is fixed before the next run. This is a great way to keep track of the security posture of the application in an automated way.
+
+#### ROLLBACK JOB IN CASE OF PENETRATION FINDINGS
+
+The Kubernetes rollback job is triggered if the OWASP ZAP scan finds any critical vulnerabilities in the application. The job will rollback the deployment to the previous good state and notify the team in the Slack channel.
 
 ## BUILD AND PUSH DOCKER IMAGE JOB
 
@@ -526,7 +554,55 @@ PS. a fresh CrowdSec installation and no attacks were detected during the time o
 
 This task was a great opportunity to showcase some of the best practices I followed in my career and to always try different tools like with the case of Crowdsec and Tailscale.
 
-# IN ORDER TO TEST
+## IN TERMS OF SUPPLY CHAIN ASSURANCE
+
+The principle of SLSA were followed in the pipeline:
+
+- Basic SLSA: The pipeline uses a CI/CD tool to automate the builds, code resides within a private version-controlled repository where logs are stored and monitored as part of the pipeline.
+- Artifacts are signed with the commit SHA and the stage (dev/prod) and the latest tag. Dependencies are checked for updates and vulnerabilities using Grype and Dependabot. Sandboxed environments are used for build and testing to prevent external tampering.
+- Main branch is protected except for the administrator for the sake of the task, MFA is enforced for the GitHub account and any third-party tools. Builds are deterministic by controlling inputs, tools, and environments. GitHub Actions provide an overview of the pipeline status, previous deployments, and logs. So we can revert back to a previous commit, thus deployment if needed.
+- Builds are replicated using the same inputs, and if no changes are detected to the app directory, or `*.tf` files, GitHub Actions will not do any changes. Nitrokey is used for access and commits. Secrets are managed by GitHub Actions as this is a PoC, in a real-world scenario, a secret management tool like HashiCorp Vault would be used.
+
+## IN TERMS OF APPLICATION SECURITY
+
+DevSecOps implementation is CI/CD-centric and implies the integration of AST (Application Security Testing) tools into the development pipeline. The pipeline includes the following security tools and the choice of one tool over the other in each category was based on my previous experience with them for Flask and Django Python backends:
+
+- Static (Semgrep, Bandit, Horusec, GoSec)
+- Compositional (Dependency Check, Trivy, OpenSCA)
+- Scanning Docker Images (Trivy, Grype)
+- Secret Scanners (GitLeaks, TruffleHog)
+- IaC Scanners (Checkov, Terrascan)
+
+### COMPLIANCE WITH OWASP TOP 10
+
+1. Broken Access Control (A01:2021): Dynamic testing with OWASP ZAP can identify broken access control issues in the application.
+2. Cryptographic Failures (A02:2021): Bandit is effective at identifying weak cryptographic implementations or configurations in the codebase.
+3. Injection (A03:2021): Bandit can detect vulnerabilities like SQLi or command injection in code.
+4. Insecure Design (A04:2021): Checkov mitigates insecure design risks by ensuring that the cloud infrastructure is securely configured.
+5. Security Misconfiguration (A05:2021): Dependency Check, Buildx, Checkov and Grype can identify configuration issues in dependencies, Docker images, and infrastructure.
+6. Vulnerable and Outdates components (A06:2021): Dependency check and Grype are well suited for ensuring dependencies are up-to-date and free of vulnerabilities.
+7. Identification and Authentication Failures (A07:2021): Static tools can identify hardcoded credentials, which is supported by TruffleHog.
+8. Software and Data Integrity Failures (A08:2021): Bandit can identify code integrity issues, while Grype can identify vulnerabilities in the built Docker images. Grype goes with Syft, but for this task I just relied on Grype directly which should integrate the Syft scanning as well. But to generate an SBOM, Syft should be used.
+9. Security Logging and Monitoring Failures (A09:2021): GitHub Actions and the pipeline are configured to send alerts to Slack. Besides GitHub keeps logs of the pipeline runs.
+10. Server-Side Request Forgery (A10:2021): Bandit can identify SSRF vulnerabilities in the codebase. DAST tools like OWASP ZAP can identify SSRF vulnerabilities in the application.
+
+#### FURTHER SECURITY MEASURES
+
+- Broad coverage of security tools that address static, compositional, and infrastructure-related vulnerabilities effectively.
+- Secrets Management with GitHub Actions secrets and TruffleHog. I'd like to again say that in a real-world scenario, a secret management tool like HashiCorp Vault would be used and checking for secrets can take place as part of the pre-commit hooks!
+- Shift-Lift Security with the integration of security tools in the CI/CD pipeline.
+- Container Security with Grype.
+- Runtime Security with Falco and CrowdSec.
+- Incident Response with Falco Sidekick, Loki, and CrowdSec.
+- Compliance Monitoring
+- Dynamic Testing DAST with OWASP ZAP
+- Kubernetes rollback in case of penetration findings.
+
+#### COMPLIANCES
+
+In my work, I ensure compliance with key security and privacy standards, including ISO27001, SOC2, GDPR, NIST 800-53, and 800-218, by integrating robust tools and workflows into CI/CD pipelines. I adopt best practices from OpenSSF and SLSA to enhance supply chain security, while aligning with OWASP Top 10 recommendations. Remediation of vulnerabilities identified during penetration tests is prioritised, ensuring both proactive and reactive measures uphold organisational compliance and mitigate risks effectively.
+
+## IN ORDER TO TEST
 
 I will leave the infrastructure running on AWS for few days and will be available to comment on the work and hear any feedback or suggestions you might have.
 

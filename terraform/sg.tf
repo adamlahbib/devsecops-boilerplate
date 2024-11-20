@@ -26,4 +26,6 @@ resource "aws_security_group" "eks_cluster_sg" {
     tags = {
         Name = "eks-cluster-sg"
     }
+
+    depends_on = [module.vpc]
 }

@@ -81,6 +81,22 @@ jobs:
             echo "status=No changes to deploy on DEV" >> $GITHUB_OUTPUT
           fi
 
+      - name: ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.13.0
+        with: 
+          token: ${{ secrets.GIT_TOKEN }}
+          target: "https://aqemia.admida0ui.de/dev/docs/"
+
+      - name: Rollback on Penertration Test Failure
+        if: failure()
+        env:
+          STAGE: "dev"
+        shell: bash
+        run: |
+          kubectl rollout undo deployment/app -n ${STAGE}
+          echo "status=Deployment failed because of Penetration Test Failure! Rolling back to previous deployment" >> $GITHUB_OUTPUT
+
+
   notify-slack:
     needs:
       - deploy

@@ -116,7 +116,7 @@ resource "aws_eks_node_group" "eks_nodes" {
         max_unavailable = 1
     }
 
-    depends_on = [aws_iam_instance_profile.eks_node_instance_profile, aws_eks_cluster.eks_cluster]
+    depends_on = [aws_iam_instance_profile.eks_node_instance_profile, aws_eks_cluster.eks_cluster, aws_security_group.eks_cluster_sg]
 }
 
 resource "aws_iam_role" "worker_role" {
