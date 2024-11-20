@@ -219,9 +219,7 @@ spec:
           spec:
             containers:
               - readinessProbe: "?*"
-YAML          namespaces:
-            - prod
-            - dev
+YAML
     depends_on = [helm_release.kyverno]
 }
 
