@@ -6,6 +6,8 @@ For the following, a subdomain from my personal blog was used, which you can vis
 
 - Production URL: https://aqemia.admida0ui.de/docs
 
+- Development URL (if deployed): https://aqemia.admida0ui.de/dev/docs
+
 - Slack for Alerts and Notifications (invited): https://adaml-test.slack.com/ 
 
 Once connected to the Tailnet (invited):
@@ -244,6 +246,10 @@ Checkov is a static code analysis tool for infrastructure-as-code. It scans Terr
 ### TERRAFORM DRIFT DETECTION
 
 I first wanted to use Terramate for this but their process involved using a client locally on my laptop and more, so I went with this one https://github.com/azure-samples/terraform-github-actions/blob/main/.github/workflows/tf-drift.yml that was a great inspiration to understand the process from and implement it myself.
+
+REFER TO THIS [JOB LOG](https://github.com/adamlahbib/aqemia/actions/runs/11924994674)
+
+![](2024-11-20-02-33-26.png)
 
 ### TRUFFLEHOG
 
