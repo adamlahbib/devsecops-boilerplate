@@ -54,7 +54,11 @@ jobs:
           terraform_wrapper: false
         
       - name: Terraform Init
-        run: terraform init
+        run: |
+          terraform init \
+            -backend-config="bucket=${TFSTATE_BUCKET}" \
+            -backend-config="key=${TFSTATE_KEY}" \
+            -backend-config="region=${AWS_REGION}"
 
       - name: Terraform Plan
         id: tfplan
