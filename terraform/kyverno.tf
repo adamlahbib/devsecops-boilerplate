@@ -6,29 +6,8 @@ resource "helm_release" "kyverno" {
     create_namespace = true
     version = "3.3.3"
 
-    set {
-        name  = "admissionController.container.extraArgs"
-        value = "--autoUpdateWebhooks=false"
-    }
-
     values = [
-      yamlencode({
-        config = {
-          webhooks = [
-            {
-              namespaceSelector = {
-                matchExpressions = [
-                  {
-                    key = "kubernetes.io/metadata.name"
-                    operator = "NotIn"
-                    values = ["kyverno", "kube-system", "monitoring", "crowdsec", "falco", "tailscale", "nginx-ingress"]
-                  }
-                ]
-              }
-            }
-          ]
-        }
-      })
+        file("./assets/kyverno-values.yaml")
     ]
 
     depends_on = [
