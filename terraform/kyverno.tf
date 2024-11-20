@@ -24,7 +24,7 @@ metadata:
   name: app-must-have-label
 spec:
   validationFailureAction: enforce
-  background: true
+  background: false
   rules:
     - name: app-must-have-label
       match:
@@ -53,7 +53,7 @@ metadata:
   name: restrict-container-registries
 spec:
   validationFailureAction: enforce
-  background: true
+  background: false
   rules:
     - name: restrict-contrainer-registries
       match:
@@ -84,7 +84,7 @@ metadata:
   name: disallow-latest-tag
 spec:
   validationFailureAction: enforce
-  background: true
+  background: false
   rules:
     - name: require-image-tag
       match:
@@ -116,7 +116,7 @@ metadata:
   name: disallow-nodeport-service
 spec:
   validationFailureAction: enforce
-  background: true
+  background: false
   rules:
     - name: disallow-nodeport-service
       match:
@@ -146,6 +146,7 @@ metadata:
   name: enforce-max-replicas
 spec:
   validationFailureAction: enforce
+  background: false
   rules:
     - name: enforce-max-replicas
       match:
@@ -203,6 +204,7 @@ metadata:
   name: disallow-privileged-containers
 spec:
   validationFailureAction: enforce
+  background: false
   rules:
     - name: disallow-privileged-containers
       match:
@@ -240,6 +242,7 @@ metadata:
   name: require-pod-probes
 spec:
   validationFailureAction: enforce
+  background: false
   rules:
     - name: require-pod-probes
       match:
@@ -272,6 +275,7 @@ metadata:
   name: require-resource-limits
 spec:
   validationFailureAction: audit
+  background: false
   rules:
     - name: require-resource-limits
       match:
