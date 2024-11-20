@@ -112,7 +112,7 @@ resource "kubernetes_ingress_v1" "prod-ingress" {
 
             http {
                 path {
-                    path = "/prod/"
+                    path = "/"
                     path_type = "Prefix"
                     backend{
                         service {
