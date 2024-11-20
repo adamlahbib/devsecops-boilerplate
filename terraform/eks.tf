@@ -107,13 +107,13 @@ resource "aws_eks_node_group" "eks_nodes" {
     }
 
     scaling_config {
-        desired_size = 3
+        desired_size = 0
         max_size     = 4
-        min_size     = 1
+        min_size     = 0
     }
 
     update_config {
-        max_unavailable = 1
+        max_unavailable = 0
     }
 
     depends_on = [aws_iam_instance_profile.eks_node_instance_profile, aws_eks_cluster.eks_cluster]
