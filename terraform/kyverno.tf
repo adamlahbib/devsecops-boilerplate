@@ -12,19 +12,21 @@ resource "helm_release" "kyverno" {
     }
 
     values = [
-      config.webhooks = [
-        {
-          namespaceSelector = {
-            matchExpressions = [
-              {
-                key = "kubernetes.io/metadata.name"
-                operator = "NotIn"
-                values = ["kyverno, kube-system, monitoring, crowdsec, falco, tailscale, nginx-ingress"]
-              }
-            ]
+      config = {
+        webhooks = [
+          {
+            namespaceSelector = {
+              matchExpressions = [
+                {
+                  key = "kubernetes.io/metadata.name"
+                  operator = "NotIn"
+                  values = ["kyverno", "kube-system", "monitoring", "crowdsec", "falco", "tailscale", "nginx-ingress"]
+                }
+              ]
+            }
           }
-        }
-      ]
+        ]
+      }
     ]
 
     depends_on = [
