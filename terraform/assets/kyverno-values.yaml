@@ -1,3 +1,5 @@
+admissionController:
+  createSelfSignedCert: true
 config:
   webhooks:
     namespaceSelector:
