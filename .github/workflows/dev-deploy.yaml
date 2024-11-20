@@ -85,7 +85,7 @@ jobs:
         uses: zaproxy/action-baseline@v0.13.0
         with: 
           token: ${{ secrets.GIT_TOKEN }}
-          target: "https://aqemia.admida0ui.de/dev/docs/"
+          target: "https://staging.tailcf97d7.ts.net/docs/"
 
       - name: Rollback on Penertration Test Failure
         if: failure()

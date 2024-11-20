@@ -53,31 +53,21 @@ resource "kubernetes_ingress_v1" "dev-ingress" {
     metadata {
         name      = "dev-ingress"
         namespace = "dev"
-        labels = {
-            "app" = "nginx"
-        }
-        annotations = {
-            "nginx.ingress.kubernetes.io/ssl-redirect"    = "false"
-            "nginx.ingress.kubernetes.io/force-ssl-redirect" = "false"
-            "nginx.ingress.kubernetes.io/backend-protocol" = "HTTP"
-        }
     }
 
-
     spec {
-        ingress_class_name = "nginx"
+        ingress_class_name = "tailscale"
 
         tls {
-            hosts      = ["${var.dns_name}"]
-            secret_name = "tls-cert"
+            hosts      = ["staging"]
         }
 
         rule {
-            host = var.dns_name
+            host = "staging"
 
             http {
                 path {
-                    path = "/dev/"
+                    path = "/"
                     path_type = "Prefix"
                     backend{
                         service {
@@ -91,7 +81,7 @@ resource "kubernetes_ingress_v1" "dev-ingress" {
             }
         }
     }
-    depends_on = [helm_release.nginx-ingress-controller, kubernetes_namespace.dev]
+    depends_on = [helm_release.tailscale_operator, kubernetes_namespace.dev]
 }
 
 resource "kubernetes_ingress_v1" "prod-ingress" {
@@ -122,7 +112,7 @@ resource "kubernetes_ingress_v1" "prod-ingress" {
 
             http {
                 path {
-                    path = "/"
+                    path = "/prod/"
                     path_type = "Prefix"
                     backend{
                         service {

@@ -17,5 +17,5 @@ jobs:
         uses: zaproxy/action-full-scan@v0.11.0
         with:
           token: ${{ secrets.GIT_TOKEN }}
-          target: "https://aqemia.admida0ui.de/dev/docs/"
+          target: "https://staging.tailcf97d7.ts.net/docs/"
           issue_title: "Nightly DAST Full Scan by OWASP ZAP - ${{ github.run_number }}"

@@ -10,11 +10,11 @@ For the following, a subdomain from my personal blog was used, which you can vis
 
 - Production URL: https://aqemia.admida0ui.de/docs
 
-- Development URL (if deployed): https://aqemia.admida0ui.de/dev/docs
-
 - Slack for Alerts and Notifications (invited): https://adaml-test.slack.com/ 
 
 Once connected to the Tailnet (invited):
+
+- Development URL (if deployed): https://staging.tailcf97d7.ts.net/docs/
 
 - Grafana: https://monitoring.tailcf97d7.ts.net/
 
