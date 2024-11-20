@@ -74,7 +74,7 @@ jobs:
           TF_VAR_CROWDSEC_ENROLL_KEY: ${{ inputs.CROWDSEC_ENROLL_KEY }}
         run: |
           export exitcode=0
-          terraform plan -detailed-exitcode -no-color -out tfplan || exitcode=$?
+          terraform plan -var-file ./stages/prod.tfvars -detailed-exitcode -no-color -out tfplan || exitcode=$?
           echo "exitcode=$exitcode" >> $GITHUB_ENV
           if [ $exitcode -eq 1 ]; then
             echo Terraform Plan Failed!
