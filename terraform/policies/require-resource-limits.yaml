@@ -24,13 +24,5 @@ spec:
             containers:
               - resources:
                   limits:
-                    cpu: "?*" 
-                    memory: "?*"  
-        deny:
-          conditions:
-            - key: "{{request.object.spec.containers[0].resources.limits.cpu}}"
-              operator: GreaterThan
-              value: "2" 
-            - key: "{{request.object.spec.containers[0].resources.limits.memory}}"
-              operator: GreaterThan
-              value: "1Gi" 
+                    cpu: "<=2" 
+                    memory: "<=1Gi"  

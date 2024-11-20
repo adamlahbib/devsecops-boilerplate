@@ -117,12 +117,7 @@ spec:
         message: "The number of replicas must not exceed 6."
         pattern:
           spec:
-            replicas: "?*"
-        deny:
-          conditions:
-            - key: "{{request.object.spec.replicas}}"
-              operator: GreaterThan
-              value: "6" 
+            replicas: "<=6"
 YAML
     depends_on = [helm_release.kyverno]
 }
@@ -150,15 +145,13 @@ spec:
             - ConfigMap
             - Secret
             - PVC
-      exclude:
-        name: "*nginx-ingress-controller*"
       validate:
         message: "The 'default' namespace is not allowed for resource creation."
         pattern:
           metadata:
             namespace: "!default"
 YAML
-    depends_on = [helm_release.kyverno]
+    depends_on = [helm_release.kyverno, kubernetes_service.nginx_ingress]
 }
 
 resource "kubectl_manifest" "disallow_privileged_containers" {
@@ -252,16 +245,8 @@ spec:
             containers:
               - resources:
                   limits:
-                    cpu: "?*" 
-                    memory: "?*"  
-        deny:
-          conditions:
-            - key: "{{request.object.spec.containers[0].resources.limits.cpu}}"
-              operator: GreaterThan
-              value: "2" 
-            - key: "{{request.object.spec.containers[0].resources.limits.memory}}"
-              operator: GreaterThan
-              value: "1Gi" 
+                    cpu: "<=2" 
+                    memory: "<=1Gi"  
 YAML
     depends_on = [helm_release.kyverno]
 }

@@ -38,6 +38,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Checkov Scan
+        id: checkov-scan
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: .
+
       - name: Terraform Plan
         id: terraform-plan
         uses: ./.github/actions/terraform-plan

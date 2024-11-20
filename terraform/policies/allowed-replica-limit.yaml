@@ -20,9 +20,4 @@ spec:
         message: "The number of replicas must not exceed 6."
         pattern:
           spec:
-            replicas: "?*"
-        deny:
-          conditions:
-            - key: "{{request.object.spec.replicas}}"
-              operator: GreaterThan
-              value: "6" 
+            replicas: "<=6"

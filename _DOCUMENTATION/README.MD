@@ -127,7 +127,7 @@ Therefore, I ended up relying on the larger f3-medium instances which have more 
 
 #### THE EKS CLUSTER AND NODE GROUP
 
-The EKS cluster is created with the latest version of Kubernetes and the node group has the desired capacity of 2 instances and the maximum capacity of 4 instances.
+The EKS cluster is created with the latest version of Kubernetes and the node group has the desired capacity of three instances and the maximum capacity of 4 instances.
 
 # INFRASTRUCTURE AS CODE
 
@@ -156,6 +156,7 @@ Consult the following file: [provider.tf](../terraform/provider.tf)
 [eks.tf](../terraform/eks.tf): Creates the EKS cluster and node group.
 [monitoring.tf](../terraform/monitoring.tf): Creates the monitoring resources (Prometheus, Grafana, Loki, Tempo).
 [security.tf](../terraform/security.tf): Creates the security resources (Falco, CrowdSec).
+[kyverno.tf](../terraform/kyverno.tf): Creates the Kyverno policies.
 [ingress.tf](../terraform/ingress.tf): Contains Nginx Ingress Controller and Cert-Manager deployments along with the dev, prod, and monitoring ingress resources.
 [dns.tf](../terraform/dns.tf): Creates the DNS records for the domain.
 [tls.tf](../terraform/tls.tf): Contains the TLS certificate resources with the Cert-Manager.
@@ -235,6 +236,10 @@ PyCov is a code coverage tool that measures the amount of code covered by the te
 Bandit is a tool designed to find common security issues in Python code. To do this, Bandit processes each file, builds an AST from it, and runs appropriate plugins against the AST nodes. Once Bandit has finished scanning all the files, it generates a report.
 
 ![](2024-11-19-20-45-57.png)
+
+### CHECKOV
+
+Checkov is a static code analysis tool for infrastructure-as-code. It scans Terraform, CloudFormation, Kubernetes, and other IaC files for security and compliance issues. Checkov is used to ensure that the Terraform code is secure and compliant with best practices.
 
 ### TRUFFLEHOG
 
