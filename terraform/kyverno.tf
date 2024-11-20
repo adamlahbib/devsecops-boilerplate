@@ -51,7 +51,7 @@ resource "kubectl_manifest" "restrict_container_registry" {
 apiVersion: kyverno.io/v1
 kind: ClusterPolicy
 metadata:
-  name: restrict-contrainer-registries
+  name: restrict-container-registries
 spec:
   validationFailureAction: enforce
   background: true
