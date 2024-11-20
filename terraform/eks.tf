@@ -112,9 +112,9 @@ resource "aws_eks_node_group" "eks_nodes" {
         min_size     = 0
     }
 
-    update_config {
-        max_unavailable = 0
-    }
+    # update_config {
+    #     max_unavailable = 1
+    # }
 
     depends_on = [aws_iam_instance_profile.eks_node_instance_profile, aws_eks_cluster.eks_cluster]
 }
