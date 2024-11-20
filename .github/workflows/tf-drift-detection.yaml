@@ -64,15 +64,15 @@ jobs:
       - name: Terraform Plan
         id: tfplan
         env:
-          TF_VAR_GRAFANA_ADMIN_PASSWORD: ${{ inputs.GRAFANA_ADMIN_PASSWORD }}
-          TF_VAR_CLOUDFLARE_ZONE_ID: ${{ inputs.CLOUDFLARE_ZONE_ID }}
-          TF_VAR_CLOUDFLARE_TOKEN: ${{ inputs.CLOUDFLARE_TOKEN }}
-          TF_VAR_CLOUDFLARE_EMAIL: ${{ inputs.CLOUDFLARE_EMAIL }}
-          TF_VAR_CLOUDFLARE_API_TOKEN: ${{ inputs.CLOUDFLARE_API_TOKEN }}
-          TF_VAR_SLACK_WEBHOOK: ${{ inputs.SLACK_WEBHOOK }}
-          TF_VAR_TAILSCALE_CLIENT_ID: ${{ inputs.TAILSCALE_CLIENT_ID }}
-          TF_VAR_TAILSCALE_CLIENT_SECRET: ${{ inputs.TAILSCALE_CLIENT_SECRET }}
-          TF_VAR_CROWDSEC_ENROLL_KEY: ${{ inputs.CROWDSEC_ENROLL_KEY }}
+          TF_VAR_GRAFANA_ADMIN_PASSWORD: ${{ env.GRAFANA_ADMIN_PASSWORD }}
+          TF_VAR_CLOUDFLARE_ZONE_ID: ${{ env.CLOUDFLARE_ZONE_ID }}
+          TF_VAR_CLOUDFLARE_TOKEN: ${{ env.CLOUDFLARE_TOKEN }}
+          TF_VAR_CLOUDFLARE_EMAIL: ${{ env.CLOUDFLARE_EMAIL }}
+          TF_VAR_CLOUDFLARE_API_TOKEN: ${{ env.CLOUDFLARE_API_TOKEN }}
+          TF_VAR_SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
+          TF_VAR_TAILSCALE_CLIENT_ID: ${{ env.TAILSCALE_CLIENT_ID }}
+          TF_VAR_TAILSCALE_CLIENT_SECRET: ${{ env.TAILSCALE_CLIENT_SECRET }}
+          TF_VAR_CROWDSEC_ENROLL_KEY: ${{ env.CROWDSEC_ENROLL_KEY }}
         run: |
           export exitcode=0
           terraform plan -var-file ./stages/prod.tfvars -detailed-exitcode -no-color -out tfplan || exitcode=$?
