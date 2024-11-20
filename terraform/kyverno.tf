@@ -43,6 +43,7 @@ spec:
             labels:
               app: "my-app|nginx"
 YAML
+    depends_on = [helm_release.kyverno]
 }
 
 resource "kubectl_manifest" "restrict_container_registry" {
