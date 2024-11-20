@@ -151,7 +151,7 @@ spec:
           metadata:
             namespace: "!default"
 YAML
-    depends_on = [helm_release.kyverno, kubernetes_service.nginx_ingress]
+    depends_on = [helm_release.kyverno]
 }
 
 resource "kubectl_manifest" "disallow_privileged_containers" {
