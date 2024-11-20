@@ -18,7 +18,6 @@ resource "helm_release" "kyverno" {
 
 resource "kubectl_manifest" "app_must_have_label" {
     yaml_body = <<YAML
-
 apiVersion: kyverno.io/v1
 kind: ClusterPolicy
 metadata:
