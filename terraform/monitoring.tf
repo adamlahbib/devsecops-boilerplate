@@ -2,7 +2,7 @@ resource "kubernetes_namespace" "monitoring" {
     metadata {
         name = "monitoring"
     }
-    depends_on = [aws_eks_cluster.eks_cluster]
+    depends_on = [aws_eks_node_group.eks_nodes]
 }
 
 resource "kubernetes_config_map" "grafana_datasources" {
@@ -46,7 +46,7 @@ resource "kubernetes_config_map" "grafana_datasources" {
             ]
         })
     }
-    depends_on = [aws_eks_cluster.eks_cluster, kubernetes_namespace.monitoring]
+    depends_on = [aws_eks_node_group.eks_nodes, kubernetes_namespace.monitoring]
 }
 
 resource "helm_release" "prometheus_operator" {
@@ -172,5 +172,5 @@ resource "kubernetes_config_map" "grafana_dashboards" {
         "21419.json" = file("./assets/21419.json"),
         "crowdsec_v5.json" = file("./assets/crowdsec_v5.json")
     }
-    depends_on = [aws_eks_cluster.eks_cluster, helm_release.prometheus_operator]
+    depends_on = [aws_eks_node_group.eks_nodes, helm_release.prometheus_operator]
 }
