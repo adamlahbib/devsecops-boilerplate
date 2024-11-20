@@ -134,17 +134,7 @@ spec:
     - name: disallow-default-namespace
       match:
         resources:
-          kinds:
-            - Pod
-            - Deployment
-            - Service
-            - StatefulSet
-            - ReplicaSet
-            - CronJob
-            - Job
-            - ConfigMap
-            - Secret
-            - PVC
+          kinds: ["*"]
       validate:
         message: "The 'default' namespace is not allowed for resource creation."
         pattern:
