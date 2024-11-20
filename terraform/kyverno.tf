@@ -6,7 +6,43 @@ resource "helm_release" "kyverno" {
     create_namespace = true
     version = "3.3.3"
 
-    depends_on = [aws_eks_node_group.eks_nodes]
+    depends_on = [
+      helm_release.nginx-ingress-controller,
+      helm_release.crowdsec,
+      helm_release.falco,
+      helm_release.prometheus_operator,
+      helm_release.loki,
+      helm_release.tempo
+    ]
+}
+
+resource "kubectl_manifest" "app_must_have_label" {
+    yaml_body = <<YAML
+
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: app-must-have-label
+spec:
+  validationFailureAction: enforce
+  background: true
+  rules:
+    - name: app-must-have-label
+      match:
+        resources:
+          kinds:
+            - Pod
+            - Service
+          namespaces:
+            - dev
+            - prod
+      validate:
+        message: "The 'app' label is required for all resources."
+        pattern:
+          metadata:
+            labels:
+              app: "my-app|nginx"
+YAML
 }
 
 resource "kubectl_manifest" "restrict_container_registry" {
@@ -17,7 +53,7 @@ metadata:
   name: restrict-contrainer-registries
 spec:
   validationFailureAction: enforce
-  background: true # Check existing resources
+  background: true
   rules:
     - name: restrict-contrainer-registries
       match:
@@ -48,7 +84,7 @@ metadata:
   name: disallow-latest-tag
 spec:
   validationFailureAction: enforce
-  background: true # Check existing resources
+  background: true
   rules:
     - name: require-image-tag
       match:
@@ -80,7 +116,7 @@ metadata:
   name: disallow-nodeport-service
 spec:
   validationFailureAction: enforce
-  background: true # Check existing resources
+  background: true
   rules:
     - name: disallow-nodeport-service
       match:
@@ -147,6 +183,9 @@ spec:
       match:
         resources:
           kinds: ["*"]
+        selector:
+          matchLabels:
+            app: my-app
       validate:
         message: "The 'default' namespace is not allowed for resource creation."
         pattern:

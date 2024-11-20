@@ -53,6 +53,9 @@ resource "kubernetes_ingress_v1" "dev-ingress" {
     metadata {
         name      = "dev-ingress"
         namespace = "dev"
+        labels = {
+            "app" = "nginx"
+        }
         annotations = {
             "nginx.ingress.kubernetes.io/ssl-redirect"    = "false"
             "nginx.ingress.kubernetes.io/force-ssl-redirect" = "false"
@@ -95,6 +98,9 @@ resource "kubernetes_ingress_v1" "prod-ingress" {
     metadata {
         name      = "prod-ingress"
         namespace = "prod"
+        labels = {
+            "app" = "nginx"
+        }
         annotations = {
             "nginx.ingress.kubernetes.io/ssl-redirect"    = "false"
             "nginx.ingress.kubernetes.io/force-ssl-redirect" = "false"
