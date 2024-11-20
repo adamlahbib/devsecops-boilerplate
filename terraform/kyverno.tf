@@ -253,11 +253,13 @@ spec:
               matchLabels:
                 app: my-app
       validate:
-        message: "Liveness and readiness probes must be set for containers."
+        message: "Readiness probes must be set for containers."
         pattern:
           spec:
             containers:
-              - readinessProbe: "?*"
+              - readinessProbe:
+                  httpGet:
+                    path: /health
 YAML
     depends_on = [helm_release.kyverno]
 }
