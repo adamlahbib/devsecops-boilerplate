@@ -130,6 +130,7 @@ metadata:
   name: disallow-default-namespace
 spec:
   validationFailureAction: audit
+  background: false
   rules:
     - name: disallow-default-namespace
       match:
