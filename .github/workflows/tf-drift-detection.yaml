@@ -58,7 +58,8 @@ jobs:
           terraform init \
             -backend-config="bucket=${TFSTATE_BUCKET}" \
             -backend-config="key=${TFSTATE_KEY}" \
-            -backend-config="region=${AWS_REGION}"
+            -backend-config="region=${AWS_REGION}" \
+            -backend-config="encrypt=true"
 
       - name: Terraform Plan
         id: tfplan
