@@ -1,0 +1,87 @@
+name: Terraform Apply
+description: 'Applies Terraform configuration'
+
+inputs:
+  aws-access-key-id:
+    description: 'AWS Access Key ID'
+    required: true
+  aws-secret-access-key:
+    description: 'AWS Secret Access Key'
+    required: true
+  aws-region:
+    description: 'AWS Region'
+    required: true
+  tfstate-bucket:
+    description: 'Terraform state bucket'
+    required: true
+  tfstate-key:
+    description: 'Terraform state key'
+    required: true
+  stage:
+    description: 'Deployment stage'
+    required: true
+  github-token:
+    description: 'GitHub token'
+    required: true
+  GRAFANA_ADMIN_PASSWORD:
+    description: 'Grafana admin password'
+    required: true
+  CLOUDFLARE_ZONE_ID:
+    description: 'Cloudflare Zone ID'
+    required: true
+  CLOUDFLARE_TOKEN:
+    description: 'Cloudflare Token'
+    required: true
+  CLOUDFLARE_EMAIL:
+    description: 'Cloudflare Email'
+    required: true
+  CLOUDFLARE_API_TOKEN:
+    description: 'Cloudflare API Token'
+    required: true
+  SLACK_WEBHOOK:
+    description: 'Slack Webhook'
+    required: true
+  TAILSCALE_CLIENT_ID:
+    description: 'Tailscale Client ID'
+    required: true
+  TAILSCALE_CLIENT_SECRET: 
+    description: 'Tailscale Client Secret'
+    required: true
+  CROWDSEC_ENROLL_KEY:
+    description: 'CrowdSec Enroll Key'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with: 
+        aws-access-key-id: ${{ inputs.aws-access-key-id }}
+        aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
+        aws-region: ${{ inputs.aws-region }}
+
+    - name: Export GitHub Token
+      shell: bash
+      run: echo "GITHUB_TOKEN=${{ inputs.github-token }}" >> $GITHUB_ENV
+
+    - name: Terraform Plan
+      env:
+        TF_VAR_GRAFANA_ADMIN_PASSWORD: ${{ inputs.GRAFANA_ADMIN_PASSWORD }}
+        TF_VAR_CLOUDFLARE_ZONE_ID: ${{ inputs.CLOUDFLARE_ZONE_ID }}
+        TF_VAR_CLOUDFLARE_TOKEN: ${{ inputs.CLOUDFLARE_TOKEN }}
+        TF_VAR_CLOUDFLARE_EMAIL: ${{ inputs.CLOUDFLARE_EMAIL }}
+        TF_VAR_CLOUDFLARE_API_TOKEN: ${{ inputs.CLOUDFLARE_API_TOKEN }}
+        TF_VAR_SLACK_WEBHOOK: ${{ inputs.SLACK_WEBHOOK }}
+        TF_VAR_TAILSCALE_CLIENT_ID: ${{ inputs.TAILSCALE_CLIENT_ID }}
+        TF_VAR_TAILSCALE_CLIENT_SECRET: ${{ inputs.TAILSCALE_CLIENT_SECRET }}
+        TF_VAR_CROWDSEC_ENROLL_KEY: ${{ inputs.CROWDSEC_ENROLL_KEY }}
+      uses: dflook/terraform-plan@v1
+      with:
+        path: ./terraform
+        var_file: ./terraform/stages/${{ inputs.stage }}.tfvars
+        backend_config: >
+          bucket=${{ inputs.tfstate-bucket }},
+          key=${{ inputs.tfstate-key }},
+          region=${{ inputs.aws-region }},
+          encrypt=true

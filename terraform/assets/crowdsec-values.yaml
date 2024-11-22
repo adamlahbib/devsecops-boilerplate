@@ -1,0 +1,67 @@
+container_runtime: containerd
+
+lapi:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 384Mi
+    limits:
+      cpu: 1000m
+      memory: 384Mi
+  persistentVolume:
+    data:
+      enabled: false
+    config:
+      enabled: false
+
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+      namespace: monitoring
+  
+  env: 
+    - name: ENROLL_KEY
+      valueFrom:
+        secretKeyRef:
+          name: crowdsec-enroll-key
+          key: ENROLL_KEY
+    - name: ENROLL_INSTANCE_NAME
+      value: "boilerplate-adaml-eks-cluster"
+    - name: ENROLL_TAGS
+      value: "boilerplate adaml eks cluster k8s"
+    - name: BOUNCER_KEY_nginx
+      valueFrom:
+        secretKeyRef:
+          name: crowdsec-bouncer-key
+          key: BOUNCER_KEY_nginx
+
+agent:
+  acquisition:
+    - namespace: ingress-nginx
+      podName: ingress-nginx-controller-*
+      program: nginx
+
+  env:
+    - name: COLLECTIONS
+      value: crowdsecurity/nginx
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 1000m
+      memory: 128Mi
+
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+      namespace: monitoring
+
+prometheus:
+      enabled: true
+      level: full
+      listen_addr: "0.0.0.0"
+      listen_port: 6060

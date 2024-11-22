@@ -1,0 +1,19 @@
+admissionController:
+  createSelfSignedCert: true
+config:
+  webhooks:
+    namespaceSelector:
+      matchExpressions:
+        - key: kubernetes.io/metadata.name
+          operator: NotIn
+          values:
+            - kube-system
+            - kyverno
+            - monitoring
+            - falco 
+            - crowdsec 
+            - nginx-ingress
+            - tailscale 
+            - cert-manager
+            - kube-public
+            - kube-node-lease

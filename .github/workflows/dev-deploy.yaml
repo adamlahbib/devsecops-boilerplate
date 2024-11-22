@@ -1,0 +1,113 @@
+name: Deploy Development Resources to EKS
+
+on:
+  push:
+    branches:
+      - dev
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_REGION: ${{ secrets.AWS_BASE_REGION }}
+  ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+  EKS_CLUSTER_NAME: ${{ secrets.EKS_CLUSTER_NAME }}
+  SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+
+jobs: 
+  deploy:
+    name: Deploy API
+    runs-on: ubuntu-latest
+    outputs:
+      message: ${{ steps.verify-deployment.outputs.status }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for Changes
+        id: find_changes
+        run: |
+          if [ -z "$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- app)" ]; then
+            echo "deploy=false" >> $GITHUB_ENV
+          else
+            echo "deploy=true" >> $GITHUB_ENV
+          fi
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-push-image
+        uses: ./.github/actions/build-push-image
+        with:
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+          ecr-repository: ${{ env.ECR_REPOSITORY }}
+          dockerfile: ./Dockerfile
+          stage: "dev"
+          buildable: ${{ env.deploy }}
+
+      - name: Update Kubeconfig
+        run: |
+          if [ "${{ env.deploy }}" != "false" ]; then
+            aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
+          fi
+
+      - name: Deploy to EKS
+        working-directory: ./k8s
+        env:
+          IMAGE: ${{ steps.build-push-image.outputs.image }}
+          STAGE: "dev"
+        run: |
+          if [ "${{ env.deploy }}" != "false" ]; then
+            sed -i "s|{{IMAGE}}|${IMAGE}|g" ${STAGE}/deployment.yaml
+            kubectl apply -f ${STAGE}
+          fi
+
+      - name: Verify Deployment
+        id: verify-deployment
+        env:
+          STAGE: "dev"
+        shell: bash
+        run: |
+          if [ "${{ env.deploy }}" != "false" ]; then
+            kubectl rollout status deployment/app -n ${STAGE} --timeout=5m
+            if [ $? -eq 0 ]; then
+              echo "status=DEV Deployment successful!" >> $GITHUB_OUTPUT
+            else
+              echo "status=DEV Deployment failed!" >> $GITHUB_OUTPUT
+              exit 1
+            fi
+          else
+            echo "status=No changes to deploy on DEV" >> $GITHUB_OUTPUT
+          fi
+
+      - name: ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.13.0
+        with: 
+          token: ${{ secrets.GIT_TOKEN }}
+          target: "https://staging.tailcf97d7.ts.net/docs/"
+
+      - name: Rollback on Penertration Test Failure
+        if: failure()
+        env:
+          STAGE: "dev"
+        shell: bash
+        run: |
+          kubectl rollout undo deployment/app -n ${STAGE}
+          echo "status=Deployment failed because of Penetration Test Failure! Rolling back to previous deployment" >> $GITHUB_OUTPUT
+
+
+  notify-slack:
+    needs:
+      - deploy
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_CHANNEL: "#deployments"
+          SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
+          SLACK_USERNAME: "Deployer on Cloudflare"
+          SLACK_MESSAGE: ${{ needs.deploy.outputs.message }}
+          SLACK_COLOR: ${{ contains(needs.deploy.outputs.message, 'successful') && 'good' || 'danger' }}
+          SLACK_ICON: "https://avatars.githubusercontent.com/u/44036562?s=200&v=4"

@@ -1,0 +1,28 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-resource-limits
+spec:
+  validationFailureAction: enforce
+  rules:
+    - name: require-resource-limits
+      match:
+        resources:
+          kinds:
+            - Pod
+            - Deployment
+            - StatefulSet
+            - ReplicaSet
+      namespaceSelector:
+        matchNames:
+          - prod
+          - dev
+      validate:
+        message: "Resource limits must be set for CPU and memory in the 'prod' and 'dev' namespaces."
+        pattern:
+          spec:
+            containers:
+              - resources:
+                  limits:
+                    cpu: "<=2" 
+                    memory: "<=1Gi"  
