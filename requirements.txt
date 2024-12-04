@@ -3,5 +3,5 @@ uvicorn==0.30.5
 pydantic==1.10.10
 pytest==7.4.2
 pytest-cov==4.1.0
-httpx==0.23.0
+httpx==0.28.0
 flake8==7.1.1
